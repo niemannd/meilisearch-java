@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class TestIntegrationTest {
+public class MeiliClientIntegrationTest {
     private static final Logger log = getLogger(ApacheHttpClient.class);
     private final String testIndexName = UUID.randomUUID().toString();
     private List<Movie> data;
@@ -46,7 +46,6 @@ public class TestIntegrationTest {
         if (resource == null) {
             throw new IllegalArgumentException("file is not found!");
         }
-        "[{\"id\":287947,\"title\":\"Shazam\",\"poster\":\"https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg\",\"overview\":\"Shazam\",\"release_date\":\"2019-03-23\"}]"
         File file = new File(resource.getFile());
         data = processor.deserialize(new BufferedReader(new InputStreamReader(new FileInputStream(file))).lines().collect(Collectors.joining()), List.class, Movie.class);
     }
@@ -61,7 +60,7 @@ public class TestIntegrationTest {
 
         DocumentService<Movie> movieService = classToTest.documentServiceForIndex(testIndexName);
         Update update = movieService.addDocument(data);
-        boolean updateFinished = false;
+        boolean updateFinished;
         do {
             updateFinished = "processed".equalsIgnoreCase(movieService.getUpdate(update.getUpdateId()).getStatus());
             Thread.sleep(500);

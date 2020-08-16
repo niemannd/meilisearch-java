@@ -33,7 +33,7 @@ public class MeiliClient {
         }
     }
 
-    public <T> DocumentService<T> createService(Class<T> clazz, String indexName, HttpClient client, Configuration config, JsonProcessor jsonProcessor) {
+    <T> DocumentService<T> createService(Class<T> clazz, String indexName, HttpClient client, Configuration config, JsonProcessor jsonProcessor) {
         try {
             return new DocumentService<>(indexName, client, config, jsonProcessor);
         } catch (ClassCastException e) {

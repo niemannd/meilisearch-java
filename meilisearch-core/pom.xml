@@ -74,9 +74,6 @@
                 <executions>
                     <execution>
                         <id>integration-test</id>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
                         <phase>integration-test</phase>
                         <configuration>
                             <excludes>
