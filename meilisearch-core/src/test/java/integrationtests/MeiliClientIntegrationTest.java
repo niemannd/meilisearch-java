@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class MeiliClientIntegrationTest {
@@ -30,6 +29,7 @@ public class MeiliClientIntegrationTest {
 
     private final Configuration config = new ConfigurationBuilder()
             .setUrl("http://localhost:7700")
+            .setKey(() -> "masterKey")
             .addDocumentType(testIndexName, Movie.class)
             .build();
 
@@ -73,10 +73,17 @@ public class MeiliClientIntegrationTest {
     }
 
     @Test
-    void name() {
+    void basicSearch() {
         DocumentService<Movie> movieService = classToTest.documentServiceForIndex(testIndexName);
         Movie movie = movieService.getDocument("450465");
 
+        assertNotNull(movie);
         assertEquals("Glass", movie.getTitle());
+        assertEquals("https://image.tmdb.org/t/p/w1280/svIDTNUoajS8dLEo7EosxvyAsgJ.jpg", movie.getPoster());
+        assertEquals("In a series of escalating encounters, security guard David Dunn uses his supernatural abilities to track Kevin Wendell Crumb, a disturbed man who has twenty-four personalities. Meanwhile, the shadowy presence of Elijah Price emerges as an orchestrator who holds secrets critical to both men.", movie.getOverview());
+        assertEquals("1547596800", movie.getReleaseDate());
+        assertNotNull(movie.getGenre());
+        assertEquals(1, movie.getGenre().size());
+        assertEquals("Documentary", movie.getGenre().get(0));
     }
 }

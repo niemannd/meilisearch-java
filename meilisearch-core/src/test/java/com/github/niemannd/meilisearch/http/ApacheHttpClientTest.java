@@ -1,6 +1,5 @@
 package com.github.niemannd.meilisearch.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.niemannd.meilisearch.api.index.Index;
 import com.github.niemannd.meilisearch.api.index.IndexService;
 import com.github.niemannd.meilisearch.config.Configuration;
@@ -35,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 class ApacheHttpClientTest {
     private final JacksonJsonProcessor processor = new JacksonJsonProcessor();
-    private final Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").build();
+    private final Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(() -> "masterKey").build();
     private final MinimalHttpClient client = mock(MinimalHttpClient.class);
     private final ApacheHttpClient classToTest = new ApacheHttpClient(client, config, processor);
     private final IndexService service = new IndexService(classToTest, processor);
@@ -86,6 +85,7 @@ class ApacheHttpClientTest {
         assertNotNull(request);
         assertEquals("/indexes?", request.getRequestUri());
         assertEquals(HttpGet.class, request.getClass());
+        assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertThrows(IllegalArgumentException.class, service::getAllIndexes);
     }
 
@@ -100,6 +100,7 @@ class ApacheHttpClientTest {
         assertNotNull(request);
         assertEquals("/indexes", request.getRequestUri());
         assertEquals(HttpPost.class, request.getClass());
+        assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertThrows(IllegalArgumentException.class, () -> service.createIndex("uid", "primaryKey"));
 
     }
@@ -115,6 +116,7 @@ class ApacheHttpClientTest {
         assertNotNull(request);
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpPut.class, request.getClass());
+        assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertThrows(IllegalArgumentException.class, () -> service.updateIndex("movies", "movie_id"));
     }
 
@@ -124,6 +126,7 @@ class ApacheHttpClientTest {
         classToTest.put("/dummy", Collections.emptyMap(), null);
         ClassicHttpRequest req = requests.poll();
         assertNotNull(req);
+        assertEquals("masterKey", req.getFirstHeader("X-Meili-API-Key").getValue());
         assertNull(req.getEntity());
     }
 
@@ -135,6 +138,7 @@ class ApacheHttpClientTest {
         assertNotNull(request);
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpDelete.class, request.getClass());
+        assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertFalse(service.deleteIndex("movies"));
     }
 
@@ -146,6 +150,7 @@ class ApacheHttpClientTest {
         assertNotNull(request);
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpDelete.class, request.getClass());
+        assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertFalse(service.deleteIndex("movies"));
     }
 
@@ -157,6 +162,7 @@ class ApacheHttpClientTest {
         assertNotNull(request);
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpDelete.class, request.getClass());
+        assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertFalse(service.deleteIndex("movies"));
     }
 
