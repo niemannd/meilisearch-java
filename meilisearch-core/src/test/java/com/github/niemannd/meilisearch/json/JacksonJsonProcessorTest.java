@@ -22,6 +22,7 @@ class JacksonJsonProcessorTest {
     void serialize() throws JsonProcessingException {
         when(mapper.writeValueAsString(any())).thenThrow(new JsonMappingException(() -> {
         }, ""));
+        assertEquals("test",classToTest.serialize("test"));
         assertNull(classToTest.serialize(new Movie()));
     }
 

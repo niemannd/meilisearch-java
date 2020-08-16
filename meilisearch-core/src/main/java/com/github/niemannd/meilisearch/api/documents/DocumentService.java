@@ -42,6 +42,7 @@ public class DocumentService<T> {
         String body = client.post(requestQuery, data);
         return jsonProcessor.deserialize(body, Update.class);
     }
+
     public Update addDocument(List<T> data) {
         String dataString = jsonProcessor.serialize(data);
         return addDocument(dataString);
@@ -49,6 +50,11 @@ public class DocumentService<T> {
 
     public Update replaceDocument(String data) {
         return addDocument(data);
+    }
+
+    public Update replaceDocument(List<T> data) {
+        String dataString = jsonProcessor.serialize(data);
+        return replaceDocument(dataString);
     }
 
     public Update updateDocument(String data) {
