@@ -30,7 +30,7 @@ Until i decide this project is stable enough for maven-central, please use jitpa
     </dependency>
 </dependencies>
 ```
-## 🚀 Getting started
+## Getting started
 
 ```java
 public final class Example {
@@ -48,9 +48,11 @@ public final class Example {
     
     meiliClient.index().createIndex("movies");
     
+    // add documents directly via string
     DocumentService<Movie> movieService = classToTest.documentServiceForIndex(testIndexName);
-    Update update = movieService.addDocument("[{\\\"id\\\":287947,\\\"title\\\":\\\"Shazam\\\",\\\"poster\\\":\\\"https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg\\\",\\\"overview\\\":\\\"Shazam\\\",\\\"release_date\\\":\\\"2019-03-23\\\"}]");
+    Update update = movieService.addDocument("[{\"id\":287947,\"title\":\"Shazam\",\"poster\":\"https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg\",\"overview\":\"Shazam\",\"release_date\":\"2019-03-23\"}]");
  
+    //or via document list
     List<Movie> movieList = new ArrayList();
     movieList.add(new Movie(...));
     Update update = movieService.addDocument(movieList);
@@ -71,3 +73,15 @@ public final class Example {
   }
 }
 ```
+## Customizing the HttpClient
+
+This client uses a small abstraction layer to decouple the used http client. To use your own http client create an implementation of the `HttpClient` interface.
+Alternatively you can use the provided implementation for [Apache HttpClient 5.0](https://hc.apache.org/httpcomponents-client-5.0.x/index.html).
+If you choose to use the Apache HttpClient implementation, please add Apache HttpClient as a dependency to your project.
+
+## Customizing the HttpClient
+
+This client uses a small abstraction layer to decouple the used json library. To use your own json library create an implementation of the `JsonProcessor` interface.
+Alternatively you can use one of the provided implementations:
+* `JacksonJsonProcessor` for Jackson Databind  
+* `GsonJsonProcessor` for Google Gson
