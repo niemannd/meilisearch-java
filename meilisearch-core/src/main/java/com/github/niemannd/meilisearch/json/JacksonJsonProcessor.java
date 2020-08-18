@@ -1,9 +1,8 @@
 package com.github.niemannd.meilisearch.json;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.niemannd.meilisearch.http.ApacheHttpClient;
+import com.github.niemannd.meilisearch.api.MeiliJSONException;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -24,21 +23,23 @@ public class JacksonJsonProcessor implements JsonProcessor {
     }
 
     @Override
-    public String serialize(Object o) {
+    public String serialize(Object o) throws MeiliJSONException {
         if (o.getClass() == String.class) {
             return (String) o;
         }
         try {
             return mapper.writeValueAsString(o);
         } catch (JsonProcessingException e) {
-            log.error("Error while serializing: ", e);
+            throw new MeiliJSONException("Error while serializing: ", e);
         }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) {
+    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliJSONException {
+        if (o == null) {
+            throw new MeiliJSONException("String to deserialize is null");
+        }
         if (targetClass == String.class) {
             return (T) o;
         }
@@ -46,12 +47,10 @@ public class JacksonJsonProcessor implements JsonProcessor {
             if (parameters == null || parameters.length == 0) {
                 return (T) mapper.readValue(o, targetClass);
             } else {
-                if (o != null)
-                    return mapper.readValue(o, mapper.getTypeFactory().constructParametricType(targetClass, parameters));
+                return mapper.readValue(o, mapper.getTypeFactory().constructParametricType(targetClass, parameters));
             }
         } catch (IOException e) {
-            log.error("Error while deserializing: ", e);
+            throw new MeiliJSONException("Error while serializing: ", e);
         }
-        return null;
     }
 }

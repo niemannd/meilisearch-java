@@ -1,7 +1,6 @@
 package com.github.niemannd.meilisearch.api.keys;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.niemannd.meilisearch.api.index.IndexService;
 import com.github.niemannd.meilisearch.http.HttpClient;
 import com.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import com.github.niemannd.meilisearch.json.JsonProcessor;
@@ -11,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

@@ -1,7 +1,6 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.api.MeiliError;
-import com.github.niemannd.meilisearch.api.MeiliErrorException;
+import com.github.niemannd.meilisearch.api.MeiliException;
 import com.github.niemannd.meilisearch.api.index.Index;
 import org.junit.jupiter.api.Test;
 
@@ -41,18 +40,18 @@ public class IndexIntegrationTest extends AbstractIT {
     @Test
     void withoutPermissions() {
         key.setKey(null);
-        assertThrows(MeiliErrorException.class, () -> client.index().getAllIndexes());
-        assertThrows(MeiliErrorException.class, () -> client.index().createIndex(UUID.randomUUID().toString()));
-        assertThrows(MeiliErrorException.class, () -> client.index().createIndex(UUID.randomUUID().toString(), "test"));
-        assertThrows(MeiliErrorException.class, () -> client.index().updateIndex(UUID.randomUUID().toString(), "test"));
-        assertThrows(MeiliErrorException.class, () -> client.index().getIndex(UUID.randomUUID().toString()));
+        assertThrows(MeiliException.class, () -> client.index().getAllIndexes());
+        assertThrows(MeiliException.class, () -> client.index().createIndex(UUID.randomUUID().toString()));
+        assertThrows(MeiliException.class, () -> client.index().createIndex(UUID.randomUUID().toString(), "test"));
+        assertThrows(MeiliException.class, () -> client.index().updateIndex(UUID.randomUUID().toString(), "test"));
+        assertThrows(MeiliException.class, () -> client.index().getIndex(UUID.randomUUID().toString()));
         assertFalse(client.index().deleteIndex(UUID.randomUUID().toString()));
         key.setKey("3b3bf839485f90453acc6159ba18fbed673ca88523093def11a9b4f4320e44a5");
-        assertThrows(MeiliErrorException.class, () -> client.index().getAllIndexes());
-        assertThrows(MeiliErrorException.class, () -> client.index().createIndex(UUID.randomUUID().toString()));
-        assertThrows(MeiliErrorException.class, () -> client.index().createIndex(UUID.randomUUID().toString(), "test"));
-        assertThrows(MeiliErrorException.class, () -> client.index().updateIndex(UUID.randomUUID().toString(), "test"));
-        assertThrows(MeiliErrorException.class, () -> client.index().getIndex(UUID.randomUUID().toString()));
+        assertThrows(MeiliException.class, () -> client.index().getAllIndexes());
+        assertThrows(MeiliException.class, () -> client.index().createIndex(UUID.randomUUID().toString()));
+        assertThrows(MeiliException.class, () -> client.index().createIndex(UUID.randomUUID().toString(), "test"));
+        assertThrows(MeiliException.class, () -> client.index().updateIndex(UUID.randomUUID().toString(), "test"));
+        assertThrows(MeiliException.class, () -> client.index().getIndex(UUID.randomUUID().toString()));
         assertFalse(client.index().deleteIndex(UUID.randomUUID().toString()));
         key.setKey("8dcbb482663333d0280fa9fedf0e0c16d52185cb67db494ce4cd34da32ce2092");
         assertDoesNotThrow(() -> client.index().getAllIndexes());

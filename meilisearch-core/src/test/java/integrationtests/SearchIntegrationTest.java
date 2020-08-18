@@ -1,6 +1,6 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.api.MeiliErrorException;
+import com.github.niemannd.meilisearch.api.MeiliException;
 import com.github.niemannd.meilisearch.api.documents.DocumentService;
 import com.github.niemannd.meilisearch.api.documents.SearchRequest;
 import com.github.niemannd.meilisearch.api.documents.SearchResponse;
@@ -70,8 +70,8 @@ public class SearchIntegrationTest extends AbstractIT {
         DocumentService<Movie> movieService = client.documentServiceForIndex(testIndexName);
 
         key.setKey(null);
-        assertThrows(MeiliErrorException.class, () -> movieService.search(new SearchRequest("450465", 0, 10, "title")));
-        assertThrows(MeiliErrorException.class, () -> movieService.search("450465"));
+        assertThrows(MeiliException.class, () -> movieService.search(new SearchRequest("450465", 0, 10, "title")));
+        assertThrows(MeiliException.class, () -> movieService.search("450465"));
         key.setKey("8dcbb482663333d0280fa9fedf0e0c16d52185cb67db494ce4cd34da32ce2092");
         assertDoesNotThrow(() -> movieService.search(new SearchRequest("450465", 0, 10, "title")));
         assertDoesNotThrow(() -> movieService.search("450465"));

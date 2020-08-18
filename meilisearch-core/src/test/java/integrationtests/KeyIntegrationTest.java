@@ -1,6 +1,6 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.api.MeiliErrorException;
+import com.github.niemannd.meilisearch.api.MeiliException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -25,9 +25,9 @@ public class KeyIntegrationTest extends AbstractIT {
     @Test
     void withoutPermission() {
         key.setKey("3b3bf839485f90453acc6159ba18fbed673ca88523093def11a9b4f4320e44a5");
-        assertThrows(MeiliErrorException.class, () -> client.keys().get());
+        assertThrows(MeiliException.class, () -> client.keys().get());
         key.setKey("8dcbb482663333d0280fa9fedf0e0c16d52185cb67db494ce4cd34da32ce2092");
-        assertThrows(MeiliErrorException.class, () -> client.keys().get());
+        assertThrows(MeiliException.class, () -> client.keys().get());
         key.setKey("masterKey");
         assertDoesNotThrow(() -> client.keys().get());
     }

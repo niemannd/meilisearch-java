@@ -3,6 +3,7 @@ package com.github.niemannd.meilisearch.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.niemannd.meilisearch.api.MeiliJSONException;
 import com.github.niemannd.meilisearch.utils.Movie;
 import org.junit.jupiter.api.Test;
 
@@ -22,19 +23,19 @@ class JacksonJsonProcessorTest {
     void serialize() throws JsonProcessingException {
         when(mapper.writeValueAsString(any())).thenThrow(new JsonMappingException(() -> {
         }, ""));
-        assertEquals("test",classToTest.serialize("test"));
-        assertNull(classToTest.serialize(new Movie()));
+        assertEquals("test", classToTest.serialize("test"));
+        assertThrows(MeiliJSONException.class, () -> classToTest.serialize(new Movie()));
     }
 
     @Test
-    @SuppressWarnings({"unchecked", "RedundantArrayCreation", "ConfusingArgumentToVarargsMethod"})
+    @SuppressWarnings({"unchecked", "ConfusingArgumentToVarargsMethod"})
     void deserialize() throws JsonProcessingException {
         when(mapper.readValue(any(String.class), any((Class.class)))).thenAnswer(invocationOnMock -> {
             throw new IOException("");
         });
-        assertNull(classToTest.deserialize("{}", Movie.class));
-        assertNull(classToTest.deserialize("{}", Movie.class, null));
-        assertNull(classToTest.deserialize("{}", Movie.class, new Class[0]));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize("{}", Movie.class));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize("{}", Movie.class, null));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize("{}", Movie.class, new Class[0]));
     }
 
     @Test
@@ -45,7 +46,7 @@ class JacksonJsonProcessorTest {
 
     @Test
     void deserializeBodyNull() {
-        assertNull(classToTest.deserialize(null, List.class, String.class));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize(null, List.class, String.class));
     }
 
     @Test

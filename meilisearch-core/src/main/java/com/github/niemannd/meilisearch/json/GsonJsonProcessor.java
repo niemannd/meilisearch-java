@@ -1,5 +1,6 @@
 package com.github.niemannd.meilisearch.json;
 
+import com.github.niemannd.meilisearch.api.MeiliJSONException;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
@@ -23,21 +24,23 @@ public class GsonJsonProcessor implements JsonProcessor {
     }
 
     @Override
-    public String serialize(Object o) {
+    public String serialize(Object o) throws MeiliJSONException {
         if (o.getClass() == String.class) {
             return (String) o;
         }
         try {
             return gson.toJson(o);
         } catch (JsonParseException e) {
-            log.error("Error while serializing: ", e);
+            throw new MeiliJSONException("Error while serializing: ", e);
         }
-        return null;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) {
+    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliJSONException {
+        if (o == null) {
+            throw new MeiliJSONException("String to deserialize is null");
+        }
         if (targetClass == String.class) {
             return (T) o;
         }
@@ -49,8 +52,7 @@ public class GsonJsonProcessor implements JsonProcessor {
                 return gson.fromJson(o, TypeToken.getParameterized(targetClass, types).getType());
             }
         } catch (JsonParseException e) {
-            log.error("Error while deserializing: ", e);
+            throw new MeiliJSONException("Error while deserializing: ", e);
         }
-        return null;
     }
 }

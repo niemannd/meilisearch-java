@@ -1,6 +1,6 @@
 package com.github.niemannd.meilisearch;
 
-import com.github.niemannd.meilisearch.api.MeiliErrorException;
+import com.github.niemannd.meilisearch.api.MeiliException;
 import com.github.niemannd.meilisearch.api.documents.DocumentService;
 import com.github.niemannd.meilisearch.api.index.IndexService;
 import com.github.niemannd.meilisearch.api.keys.KeyService;
@@ -56,7 +56,7 @@ public class MeiliClient {
     public <T> DocumentService<T> documentServiceForIndex(String index) {
         Optional<Class<?>> documentType = config.getDocumentType(index);
         if (!documentType.isPresent()) {
-            throw new MeiliErrorException("documentType could not be found");
+            throw new MeiliException("documentType could not be found");
         }
         return (DocumentService<T>) documentServices.get(documentType.get());
     }

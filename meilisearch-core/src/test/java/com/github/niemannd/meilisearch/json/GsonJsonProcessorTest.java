@@ -1,5 +1,6 @@
 package com.github.niemannd.meilisearch.json;
 
+import com.github.niemannd.meilisearch.api.MeiliJSONException;
 import com.github.niemannd.meilisearch.utils.Movie;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -20,16 +21,16 @@ class GsonJsonProcessorTest {
     void serialize() {
         when(gson.toJson(any(Movie.class))).thenThrow(new JsonParseException("this is a testexception"));
         assertEquals("test", classToTest.serialize("test"));
-        assertNull(classToTest.serialize(new Movie()));
+        assertThrows(MeiliJSONException.class, () -> classToTest.serialize(new Movie()));
     }
 
     @Test
-    @SuppressWarnings({"RedundantArrayCreation", "ConfusingArgumentToVarargsMethod", "unchecked"})
+    @SuppressWarnings({"ConfusingArgumentToVarargsMethod", "unchecked"})
     void deserialize() {
         when(gson.fromJson(any(String.class), any((Class.class)))).thenThrow(new JsonParseException("this is a testexception"));
-        assertNull(classToTest.deserialize("{}", Movie.class));
-        assertNull(classToTest.deserialize("{\"id\": 1}", Movie.class, null));
-        assertNull(classToTest.deserialize("{}", Movie.class, new Class[0]));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize("{}", Movie.class));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize("{\"id\": 1}", Movie.class, null));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize("{}", Movie.class, new Class[0]));
     }
 
     @Test
@@ -41,7 +42,7 @@ class GsonJsonProcessorTest {
 
     @Test
     void deserializeBodyNull() {
-        assertNull(classToTest.deserialize(null, List.class, String.class));
+        assertThrows(MeiliJSONException.class, () -> classToTest.deserialize(null, List.class, String.class));
     }
 
     @Test

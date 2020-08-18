@@ -1,18 +1,17 @@
 package com.github.niemannd.meilisearch.http;
 
 
-import com.github.niemannd.meilisearch.api.MeiliErrorException;
+import com.github.niemannd.meilisearch.api.MeiliAPIException;
 
-import java.io.IOException;
 import java.util.Map;
 
 public interface HttpClient {
 
-    String get(String path, Map<String, String> params) throws MeiliErrorException;
+    String get(String path, Map<String, String> params) throws MeiliAPIException;
 
-    <T> String post(String path, T body) throws MeiliErrorException;
+    <T> String post(String path, T body) throws MeiliAPIException;
 
-    <T> String put(String path, Map<String, String> params, T body) throws MeiliErrorException;
+    <T> String put(String path, Map<String, String> params, T body) throws MeiliAPIException;
 
     boolean delete(String path);
 

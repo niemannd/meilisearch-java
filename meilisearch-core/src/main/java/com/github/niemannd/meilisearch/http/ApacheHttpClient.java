@@ -1,7 +1,7 @@
 package com.github.niemannd.meilisearch.http;
 
+import com.github.niemannd.meilisearch.api.MeiliAPIException;
 import com.github.niemannd.meilisearch.api.MeiliError;
-import com.github.niemannd.meilisearch.api.MeiliErrorException;
 import com.github.niemannd.meilisearch.config.Configuration;
 import com.github.niemannd.meilisearch.json.JsonProcessor;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
@@ -46,7 +46,7 @@ public class ApacheHttpClient implements HttpClient {
                 .collect(Collectors.joining("&"));
     }
 
-    CloseableHttpResponse execute(ClassicHttpRequest request) throws MeiliErrorException {
+    CloseableHttpResponse execute(ClassicHttpRequest request) throws MeiliAPIException {
         Supplier<String> keySupplier = config.getKey();
         if (keySupplier != null && keySupplier.get() != null) {
             request.addHeader("X-Meili-API-Key", keySupplier.get());
@@ -58,28 +58,28 @@ public class ApacheHttpClient implements HttpClient {
             if (responseCode < 200 || responseCode > 299) {
                 if (response.getEntity() != null) {
                     MeiliError error = processor.deserialize(EntityUtils.toString(response.getEntity()), MeiliError.class);
-                    throw new MeiliErrorException(error.getMessage(), error);
+                    throw new MeiliAPIException(error.getMessage(), error);
                 }
             }
         } catch (ParseException | IOException e) {
-            throw new MeiliErrorException(e);
+            throw new MeiliAPIException(e);
         }
         return response;
     }
 
     @Override
-    public String get(String path, Map<String, String> params) throws MeiliErrorException {
+    public String get(String path, Map<String, String> params) throws MeiliAPIException {
         try {
             String query = createQueryString(params);
             HttpGet request = new HttpGet(this.config.getUrl() + path + "?" + query);
             return EntityUtils.toString(execute(request).getEntity());
         } catch (IOException | ParseException e) {
-            throw new MeiliErrorException(e);
+            throw new MeiliAPIException(e);
         }
     }
 
     @Override
-    public <T> String post(String path, T body) throws MeiliErrorException {
+    public <T> String post(String path, T body) throws MeiliAPIException {
         try {
             HttpPost request = new HttpPost(this.config.getUrl() + path);
             String requestBody = processor.serialize(body);
@@ -93,12 +93,12 @@ public class ApacheHttpClient implements HttpClient {
             CloseableHttpResponse execute = execute(request);
             return EntityUtils.toString(execute.getEntity());
         } catch (IOException | ParseException e) {
-            throw new MeiliErrorException(e);
+            throw new MeiliAPIException(e);
         }
     }
 
     @Override
-    public <T> String put(String path, Map<String, String> params, T body) throws MeiliErrorException {
+    public <T> String put(String path, Map<String, String> params, T body) throws MeiliAPIException {
         try {
             HttpPut request = new HttpPut(this.config.getUrl() + path);
             params.forEach(request::addHeader);
@@ -111,7 +111,7 @@ public class ApacheHttpClient implements HttpClient {
             }
             return EntityUtils.toString(execute(request).getEntity());
         } catch (IOException | ParseException e) {
-            throw new MeiliErrorException(e);
+            throw new MeiliAPIException(e);
         }
     }
 
@@ -121,7 +121,7 @@ public class ApacheHttpClient implements HttpClient {
             HttpDelete request = new HttpDelete(this.config.getUrl() + path);
             int code = execute(request).getCode();
             return code > 199 && code < 300;
-        } catch (MeiliErrorException e) {
+        } catch (MeiliAPIException e) {
             return false;
         }
     }
