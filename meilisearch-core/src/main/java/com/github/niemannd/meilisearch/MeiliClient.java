@@ -1,5 +1,6 @@
 package com.github.niemannd.meilisearch;
 
+import com.github.niemannd.meilisearch.api.MeiliErrorException;
 import com.github.niemannd.meilisearch.api.documents.DocumentService;
 import com.github.niemannd.meilisearch.api.index.IndexService;
 import com.github.niemannd.meilisearch.api.keys.KeyService;
@@ -9,6 +10,7 @@ import com.github.niemannd.meilisearch.json.JsonProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class MeiliClient {
     private final Configuration config;
@@ -16,7 +18,7 @@ public class MeiliClient {
     private final IndexService indexService;
     private final KeyService keyService;
 
-    private final HashMap<String, DocumentService<?>> documentServices = new HashMap<>();
+    private final HashMap<Class<?>, DocumentService<?>> documentServices = new HashMap<>();
 
 
     public MeiliClient(Configuration config, HttpClient client, JsonProcessor jsonProcessor) {
@@ -27,7 +29,7 @@ public class MeiliClient {
         Map<String, Class<?>> documentTypes = config.getDocumentTypes();
         for (String index : documentTypes.keySet()) {
             documentServices.put(
-                    index,
+                    documentTypes.get(index),
                     createService(documentTypes.get(index), index, client, config, jsonProcessor)
             );
         }
@@ -46,8 +48,17 @@ public class MeiliClient {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> DocumentService<T> documentServiceForIndex(String index) {
+    public <T> DocumentService<T> documentService(Class<T> index) {
         return (DocumentService<T>) documentServices.get(index);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> DocumentService<T> documentServiceForIndex(String index) {
+        Optional<Class<?>> documentType = config.getDocumentType(index);
+        if (!documentType.isPresent()) {
+            throw new MeiliErrorException("documentType could not be found");
+        }
+        return (DocumentService<T>) documentServices.get(documentType.get());
     }
 
     public KeyService keys() {

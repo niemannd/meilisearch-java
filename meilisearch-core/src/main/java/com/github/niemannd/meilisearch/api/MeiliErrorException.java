@@ -8,13 +8,17 @@ public class MeiliErrorException extends RuntimeException {
         this.error = error;
     }
 
-    public MeiliErrorException(String message,MeiliError error) {
+    public MeiliErrorException(String message, MeiliError error) {
         super(message);
         this.error = error;
     }
 
     public MeiliErrorException(Throwable cause) {
         super(cause);
+    }
+
+    public MeiliErrorException(String message) {
+        super(message);
     }
 
     public MeiliError getError() {
