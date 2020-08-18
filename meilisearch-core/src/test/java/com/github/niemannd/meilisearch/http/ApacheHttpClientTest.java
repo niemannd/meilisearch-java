@@ -1,5 +1,6 @@
 package com.github.niemannd.meilisearch.http;
 
+import com.github.niemannd.meilisearch.api.MeiliErrorException;
 import com.github.niemannd.meilisearch.api.index.Index;
 import com.github.niemannd.meilisearch.api.index.IndexService;
 import com.github.niemannd.meilisearch.config.Configuration;
@@ -86,7 +87,7 @@ class ApacheHttpClientTest {
         assertEquals("/indexes?", request.getRequestUri());
         assertEquals(HttpGet.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
-        assertThrows(IllegalArgumentException.class, service::getAllIndexes);
+        assertThrows(MeiliErrorException.class, service::getAllIndexes);
     }
 
     @Test
@@ -101,7 +102,7 @@ class ApacheHttpClientTest {
         assertEquals("/indexes", request.getRequestUri());
         assertEquals(HttpPost.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
-        assertThrows(IllegalArgumentException.class, () -> service.createIndex("uid", "primaryKey"));
+        assertThrows(MeiliErrorException.class, () -> service.createIndex("uid", "primaryKey"));
 
     }
 
@@ -117,7 +118,7 @@ class ApacheHttpClientTest {
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpPut.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
-        assertThrows(IllegalArgumentException.class, () -> service.updateIndex("movies", "movie_id"));
+        assertThrows(MeiliErrorException.class, () -> service.updateIndex("movies", "movie_id"));
     }
 
     @Test

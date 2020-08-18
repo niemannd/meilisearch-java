@@ -1,5 +1,6 @@
 package com.github.niemannd.meilisearch.api.keys;
 
+import com.github.niemannd.meilisearch.api.MeiliErrorException;
 import com.github.niemannd.meilisearch.http.HttpClient;
 import com.github.niemannd.meilisearch.json.JsonProcessor;
 
@@ -16,7 +17,7 @@ public class KeyService {
         this.client = client;
     }
 
-    public Map<String,String> get() {
+    public Map<String, String> get() throws MeiliErrorException {
         String requestQuery = "/keys";
         return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()), HashMap.class, String.class, String.class);
     }
