@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class ConfigurationBuilder {
-    private String url;
-    private Supplier<String> key;
+    private String url = "http://127.0.0.1:7700";
+    private Supplier<String> key = () -> null;
     private final Map<String, Class<?>> documentTypes = new HashMap<>();
 
     public ConfigurationBuilder setUrl(String url) {
