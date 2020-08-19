@@ -1,6 +1,11 @@
 # MeiliSearch Java
 
-![GitHub](https://img.shields.io/github/license/niemannd/meilisearch-java) ![Version](https://img.shields.io/badge/version-alpha-critical)  
+![GitHub](https://img.shields.io/github/license/niemannd/meilisearch-java) 
+![maven test](https://github.com/niemannd/meilisearch-java/workflows/maven%20test/badge.svg) 
+[![codecov](https://codecov.io/gh/niemannd/meilisearch-java/branch/master/graph/badge.svg)](https://codecov.io/gh/niemannd/meilisearch-java)  
+
+| Important!: this project is still WIP and not recommended for production |
+| --- |
 
 **MeiliSearch Java** is a client for **MeiliSearch** written in Java. **MeiliSearch** is a 
 powerful, fast, open-source, easy to use and deploy search engine. Both searching and indexing 
@@ -24,8 +29,8 @@ Until i decide this project is stable enough for maven-central, please use jitpa
 ```xml
 <dependencies>
     <dependency>
-        <groupId>com.github.niemannd</groupId>
-        <artifactId>meilisearch-java</artifactId>
+        <groupId>io.github.niemannd</groupId>
+        <artifactId>meilisearch-core</artifactId>
         <version>master-SNAPSHOT</version>
     </dependency>
 </dependencies>
@@ -38,6 +43,7 @@ public final class Example {
   public static void main(String args[]) throws Exception {
     Configuration config = new ConfigurationBuilder()
                 .setUrl("http://localhost:7700")
+                .setKey(() -> "masterKey")
                 .addDocumentType("movies", Movie.class)
                 .build();
 
@@ -49,7 +55,7 @@ public final class Example {
     meiliClient.index().createIndex("movies");
     
     // add documents directly via string
-    DocumentService<Movie> movieService = classToTest.documentServiceForIndex(testIndexName);
+    DocumentService<Movie> movieService = classToTest.documentService(Movie.class);
     Update update = movieService.addDocument("[{\"id\":287947,\"title\":\"Shazam\",\"poster\":\"https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg\",\"overview\":\"Shazam\",\"release_date\":\"2019-03-23\"}]");
  
     //or via document list
