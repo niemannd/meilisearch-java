@@ -1,6 +1,7 @@
 package io.github.niemannd.meilisearch.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.niemannd.meilisearch.api.MeiliJSONException;
 import org.slf4j.Logger;
@@ -15,7 +16,8 @@ public class JacksonJsonProcessor implements JsonProcessor {
     private final ObjectMapper mapper;
 
     public JacksonJsonProcessor() {
-        this(new ObjectMapper());
+        this.mapper = new ObjectMapper();
+        this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public JacksonJsonProcessor(ObjectMapper mapper) {
