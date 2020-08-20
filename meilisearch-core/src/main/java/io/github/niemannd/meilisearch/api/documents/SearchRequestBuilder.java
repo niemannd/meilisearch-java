@@ -4,14 +4,14 @@ import java.util.List;
 
 public class SearchRequestBuilder {
     private String q;
-    private int offset;
-    private int limit;
+    private int offset = 0;
+    private int limit = 10;
     private String filters;
     private List<String> attributesToRetrieve;
     private List<String> attributesToCrop;
-    private int cropLength;
+    private int cropLength = 80;
     private List<String> attributesToHighlight;
-    private boolean matches;
+    private boolean matches = true;
 
     public SearchRequestBuilder setQ(String q) {
         this.q = q;

@@ -9,7 +9,9 @@ import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import java.awt.image.RasterFormatException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class MeiliExceptionTest {
 
@@ -32,8 +34,23 @@ class MeiliExceptionTest {
                 .build();
         validator.validate(PojoClassFactory.getPojoClass(MeiliError.class));
 
-        MeiliAPIException meiliAPIException = new MeiliAPIException("Test",null);
-        assertFalse(meiliAPIException.hasError());
     }
 
+    @Test
+    void hasError() {
+        MeiliAPIException meiliAPIException = new MeiliAPIException("Test", null);
+        assertFalse(meiliAPIException.hasError());
+
+        meiliAPIException = new MeiliAPIException("Test", new MeiliError("Test", "C200"));
+        assertTrue(meiliAPIException.hasError());
+    }
+
+    @Test
+    void jsonException() {
+        MeiliJSONException test = new MeiliJSONException(new RasterFormatException("Test"));
+        assertEquals("Test", test.getCause().getMessage());
+        test = new MeiliJSONException("Testing", new RasterFormatException("Test"), true, true);
+        assertEquals("Testing", test.getMessage());
+        assertEquals("Test", test.getCause().getMessage());
+    }
 }
