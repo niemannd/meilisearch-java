@@ -1,18 +1,20 @@
 package io.github.niemannd.meilisearch.api.documents;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class SearchRequest {
-    private String q;
-    private int offset;
-    private int limit;
-    private String filters;
-    private List<String> attributesToRetrieve;
-    private List<String> attributesToCrop;
-    private int cropLength;
-    private List<String> attributesToHighlight;
-    private boolean matches;
+    private final String q;
+    private final int offset;
+    private final int limit;
+    private final String filters;
+    private final List<String> attributesToRetrieve;
+    private final List<String> attributesToCrop;
+    private final int cropLength;
+    private final List<String> attributesToHighlight;
+    private final boolean matches;
 
     public SearchRequest(String q) {
         this(q, 0);
@@ -23,17 +25,17 @@ public class SearchRequest {
     }
 
     public SearchRequest(String q, int offset, int limit) {
-        this(q, offset, limit, "*");
+        this(q, offset, limit, Collections.singletonList("*"));
     }
 
-    public SearchRequest(String q, int offset, int limit, String attributesToRetrieve) {
+    public SearchRequest(String q, int offset, int limit, List<String> attributesToRetrieve) {
         this(q, offset, limit, attributesToRetrieve, null, 200, null, null, false);
     }
 
     public SearchRequest(String q,
                          int offset,
                          int limit,
-                         String attributesToRetrieve,
+                         List<String> attributesToRetrieve,
                          List<String> attributesToCrop,
                          int cropLength,
                          List<String> attributesToHighlight,
@@ -42,9 +44,7 @@ public class SearchRequest {
         this.q = q;
         this.offset = offset;
         this.limit = limit;
-        this.attributesToRetrieve = new ArrayList<String>() {{
-            add(attributesToRetrieve);
-        }};
+        this.attributesToRetrieve = attributesToRetrieve;
         this.attributesToCrop = attributesToCrop;
         this.cropLength = cropLength;
         this.attributesToHighlight = attributesToHighlight;

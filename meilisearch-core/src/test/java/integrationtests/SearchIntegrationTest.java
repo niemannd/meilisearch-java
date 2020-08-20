@@ -3,11 +3,15 @@ package integrationtests;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.DocumentService;
 import io.github.niemannd.meilisearch.api.documents.SearchRequest;
+import io.github.niemannd.meilisearch.api.documents.SearchRequestBuilder;
 import io.github.niemannd.meilisearch.api.documents.SearchResponse;
 import io.github.niemannd.meilisearch.utils.Movie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,7 +53,7 @@ public class SearchIntegrationTest extends AbstractIT {
     @Test
     void complexSearch() {
         DocumentService<Movie> movieService = client.documentServiceForIndex(testIndexName);
-        SearchResponse<Movie> movieResult = movieService.search(new SearchRequest("450465", 0, 10, "title"));
+        SearchResponse<Movie> movieResult = movieService.search(new SearchRequest("450465", 0, 10, Collections.singletonList("title")));
 
         assertNotNull(movieResult);
         assertNotNull(movieResult.getHits());
@@ -70,14 +74,35 @@ public class SearchIntegrationTest extends AbstractIT {
         DocumentService<Movie> movieService = client.documentServiceForIndex(testIndexName);
 
         key.setKey(null);
-        assertThrows(MeiliException.class, () -> movieService.search(new SearchRequest("450465", 0, 10, "title")));
+        assertThrows(MeiliException.class, () -> movieService.search(new SearchRequest("450465", 0, 10, Collections.singletonList("title"))));
         assertThrows(MeiliException.class, () -> movieService.search("450465"));
         key.setKey("8dcbb482663333d0280fa9fedf0e0c16d52185cb67db494ce4cd34da32ce2092");
-        assertDoesNotThrow(() -> movieService.search(new SearchRequest("450465", 0, 10, "title")));
+        assertDoesNotThrow(() -> movieService.search(new SearchRequest("450465", 0, 10, Collections.singletonList("title"))));
         assertDoesNotThrow(() -> movieService.search("450465"));
         key.setKey("3b3bf839485f90453acc6159ba18fbed673ca88523093def11a9b4f4320e44a5");
-        assertDoesNotThrow(() -> movieService.search(new SearchRequest("450465", 0, 10, "title")));
+        assertDoesNotThrow(() -> movieService.search(new SearchRequest("450465", 0, 10, Collections.singletonList("title"))));
         assertDoesNotThrow(() -> movieService.search("450465"));
 
+    }
+
+    @Test
+    void withFilter() {
+        DocumentService<Movie> movieService = client.documentServiceForIndex(testIndexName);
+
+        SearchResponse<Movie> search = movieService.search(
+                new SearchRequestBuilder()
+                        .setQ("S")
+                        .setAttributesToRetrieve(Arrays.asList("id", "release_date"))
+                        .build()
+        );
+        assertEquals(45, search.getNbHits());
+        assertNotNull(search.getHits());
+        assertEquals(10, search.getHits().size());
+        assertEquals(287947, search.getHits().get(0).getId());
+        assertNull(search.getHits().get(0).getTitle());
+        assertNull(search.getHits().get(0).getPoster());
+        assertNull(search.getHits().get(0).getOverview());
+        assertEquals("1553299200", search.getHits().get(0).getReleaseDate());
+        assertNull(search.getHits().get(0).getGenre());
     }
 }
