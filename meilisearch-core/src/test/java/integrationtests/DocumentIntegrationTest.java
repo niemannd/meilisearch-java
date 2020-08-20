@@ -1,8 +1,8 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.api.MeiliException;
-import com.github.niemannd.meilisearch.api.documents.DocumentService;
-import com.github.niemannd.meilisearch.utils.Movie;
+import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.api.documents.DocumentService;
+import io.github.niemannd.meilisearch.utils.Movie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

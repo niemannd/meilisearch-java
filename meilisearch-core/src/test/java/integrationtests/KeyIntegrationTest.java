@@ -1,6 +1,6 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.api.MeiliException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;

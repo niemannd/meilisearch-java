@@ -1,7 +1,7 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.api.MeiliException;
-import com.github.niemannd.meilisearch.api.index.Index;
+import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.api.index.Index;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

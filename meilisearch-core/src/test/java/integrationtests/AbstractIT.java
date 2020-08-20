@@ -1,13 +1,13 @@
 package integrationtests;
 
-import com.github.niemannd.meilisearch.MeiliClient;
-import com.github.niemannd.meilisearch.api.documents.DocumentService;
-import com.github.niemannd.meilisearch.api.documents.Update;
-import com.github.niemannd.meilisearch.config.Configuration;
-import com.github.niemannd.meilisearch.config.ConfigurationBuilder;
-import com.github.niemannd.meilisearch.http.ApacheHttpClient;
-import com.github.niemannd.meilisearch.json.JacksonJsonProcessor;
-import com.github.niemannd.meilisearch.utils.Movie;
+import io.github.niemannd.meilisearch.MeiliClient;
+import io.github.niemannd.meilisearch.api.documents.DocumentService;
+import io.github.niemannd.meilisearch.api.documents.Update;
+import io.github.niemannd.meilisearch.config.Configuration;
+import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
+import io.github.niemannd.meilisearch.http.ApacheHttpClient;
+import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
+import io.github.niemannd.meilisearch.utils.Movie;
 
 import java.io.*;
 import java.net.URL;
