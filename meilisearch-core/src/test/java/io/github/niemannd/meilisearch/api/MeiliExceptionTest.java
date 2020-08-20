@@ -9,6 +9,8 @@ import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 class MeiliExceptionTest {
 
     @Test
@@ -29,6 +31,9 @@ class MeiliExceptionTest {
                 .with(new SetterTester())
                 .build();
         validator.validate(PojoClassFactory.getPojoClass(MeiliError.class));
+
+        MeiliAPIException meiliAPIException = new MeiliAPIException("Test",null);
+        assertFalse(meiliAPIException.hasError());
     }
 
 }

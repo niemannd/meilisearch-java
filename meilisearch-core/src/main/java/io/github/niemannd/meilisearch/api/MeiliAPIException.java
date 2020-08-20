@@ -17,6 +17,6 @@ public class MeiliAPIException extends MeiliException {
     }
 
     public boolean hasError() {
-        return error == null;
+        return error != null;
     }
 }

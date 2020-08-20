@@ -20,8 +20,7 @@ public class MeiliClient {
 
     private final HashMap<Class<?>, DocumentService<?>> documentServices = new HashMap<>();
 
-
-    public MeiliClient(Configuration config, HttpClient client, JsonProcessor jsonProcessor) {
+    public MeiliClient(Configuration config, HttpClient client, JsonProcessor jsonProcessor, DocumentServiceFactory documentServiceFactory) {
         this.config = config;
         this.indexService = new IndexService(client, jsonProcessor);
         this.keyService = new KeyService(client, jsonProcessor);
@@ -30,17 +29,13 @@ public class MeiliClient {
         for (String index : documentTypes.keySet()) {
             documentServices.put(
                     documentTypes.get(index),
-                    createService(documentTypes.get(index), index, client, config, jsonProcessor)
+                    documentServiceFactory.createService(documentTypes.get(index), index, client, config, jsonProcessor)
             );
         }
     }
 
-    <T> DocumentService<T> createService(Class<T> clazz, String indexName, HttpClient client, Configuration config, JsonProcessor jsonProcessor) {
-        try {
-            return new DocumentService<>(indexName, client, config, jsonProcessor);
-        } catch (ClassCastException e) {
-            throw new MeiliException(e);
-        }
+    public MeiliClient(Configuration config, HttpClient client, JsonProcessor jsonProcessor) {
+        this(config,client,jsonProcessor,new DocumentServiceFactory());
     }
 
     public IndexService index() {
