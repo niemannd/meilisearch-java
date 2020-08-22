@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class MeiliClientTest {
@@ -35,7 +34,7 @@ class MeiliClientTest {
     @Test
     void clientCreate() {
         DocumentServiceFactory mock = mock(DocumentServiceFactory.class);
-        when(mock.createService(any(), any(), any(), any(), any()))
+        when(mock.createService(any(), any(), any(), any()))
                 .thenThrow(MeiliException.class);
 
         assertThrows(MeiliException.class, () -> new MeiliClient(config, client, processor, mock));

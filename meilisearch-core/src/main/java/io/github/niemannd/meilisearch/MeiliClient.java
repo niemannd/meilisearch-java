@@ -29,7 +29,7 @@ public class MeiliClient {
         for (String index : documentTypes.keySet()) {
             documentServices.put(
                     documentTypes.get(index),
-                    documentServiceFactory.createService(documentTypes.get(index), index, client, config, jsonProcessor)
+                    documentServiceFactory.createService(index, client, config, jsonProcessor)
             );
         }
     }

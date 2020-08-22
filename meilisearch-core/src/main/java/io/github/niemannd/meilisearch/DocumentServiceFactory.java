@@ -6,7 +6,7 @@ import io.github.niemannd.meilisearch.http.HttpClient;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 
 public class DocumentServiceFactory {
-    public <T> DocumentService<T> createService(Class<T> clazz, String indexName, HttpClient client, Configuration config, JsonProcessor jsonProcessor) {
+    public <T> DocumentService<T> createService(String indexName, HttpClient client, Configuration config, JsonProcessor jsonProcessor) {
         return new DocumentService<>(indexName, client, config, jsonProcessor);
     }
 }

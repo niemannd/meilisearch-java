@@ -1,20 +1,21 @@
 package io.github.niemannd.meilisearch.http;
 
+import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.api.documents.DocumentService;
 import io.github.niemannd.meilisearch.api.index.Index;
 import io.github.niemannd.meilisearch.api.index.IndexService;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
+import io.github.niemannd.meilisearch.utils.Movie;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.MinimalHttpClient;
-import org.apache.hc.core5.http.ClassicHttpRequest;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.BasicHttpEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +26,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ApacheHttpClientTest {
     private final JacksonJsonProcessor processor = new JacksonJsonProcessor();
@@ -40,8 +40,8 @@ class ApacheHttpClientTest {
     private final ApacheHttpClient classToTest = new ApacheHttpClient(client, config, processor);
     private final IndexService service = new IndexService(classToTest, processor);
 
-    private ArrayDeque<ClassicHttpRequest> requests = new ArrayDeque<>();
-    private ArrayDeque<ClassicHttpResponse> responses = new ArrayDeque<>();
+    private final ArrayDeque<ClassicHttpRequest> requests = new ArrayDeque<>();
+    private final ArrayDeque<ClassicHttpResponse> responses = new ArrayDeque<>();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -88,6 +88,65 @@ class ApacheHttpClientTest {
         assertEquals(HttpGet.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
         assertThrows(MeiliException.class, service::getAllIndexes);
+    }
+
+    @Test
+    void getWithMeiliError() {
+        responses.add(this.getResponse(404, "{\"message\":\"Document with id 1 not found\",\"errorCode\":\"document_not_found\",\"errorType\":\"invalid_request_error\",\"errorLink\":\"https://docs.meilisearch.com/errors#document_not_found\"}"));
+        DocumentService<Movie> movies = new DocumentService<>("movies", classToTest, config, processor);
+        MeiliAPIException exception = assertThrows(MeiliAPIException.class, () -> movies.getDocument("1"));
+        assertTrue(exception.hasError());
+        assertEquals("document_not_found", exception.getError().getErrorCode());
+        assertEquals("Document with id 1 not found", exception.getError().getMessage());
+        assertEquals("invalid_request_error", exception.getError().getErrorType());
+        assertEquals("https://docs.meilisearch.com/errors#document_not_found", exception.getError().getErrorLink());
+    }
+
+
+    @Test
+    void requestsWithException() throws IOException {
+        String message = "oh boy!";
+        CloseableHttpResponse mock = mock(CloseableHttpResponse.class);
+        HttpEntity entity = mock(HttpEntity.class);
+        when(entity.getContent()).thenAnswer(invocationOnMock -> new ByteArrayInputStream(message.getBytes()));
+        when(mock.getCode()).thenReturn(200);
+        when(mock.getEntity()).thenReturn(entity);
+        doThrow(new IOException(message)).when(mock).close();
+        reset(client);
+        when(client.execute(any(ClassicHttpRequest.class))).then(invocationOnMock -> {
+            requests.add(invocationOnMock.getArgument(0));
+            return responses.poll();
+        });
+        responses.addAll(Arrays.asList(mock, mock, mock));
+
+        MeiliAPIException meiliAPIException = assertThrows(MeiliAPIException.class, () -> this.service.createIndex("0"));
+        assertEquals(message, meiliAPIException.getCause().getMessage());
+        meiliAPIException = assertThrows(MeiliAPIException.class, () -> this.service.getIndex("0"));
+        assertEquals(message, meiliAPIException.getCause().getMessage());
+        meiliAPIException = assertThrows(MeiliAPIException.class, () -> this.service.updateIndex("0", "0"));
+        assertEquals(message, meiliAPIException.getCause().getMessage());
+    }
+
+    @Test
+    void requestWithoutEntity() throws IOException {
+        CloseableHttpResponse mock = mock(CloseableHttpResponse.class);
+        when(mock.getCode()).thenReturn(404);
+        when(mock.getEntity()).thenReturn(null);
+        responses.addAll(Arrays.asList(mock, mock, mock, mock));
+
+        reset(client);
+        when(client.execute(any(ClassicHttpRequest.class))).thenAnswer(invocationOnMock -> {
+            requests.add(invocationOnMock.getArgument(0));
+            return responses.poll();
+        });
+
+        MeiliAPIException exception = assertThrows(MeiliAPIException.class, () -> this.service.createIndex("0"));
+        assertEquals("empty response body", exception.getMessage());
+        exception = assertThrows(MeiliAPIException.class, () -> this.service.getIndex("0"));
+        assertEquals("empty response body", exception.getMessage());
+        exception = assertThrows(MeiliAPIException.class, () -> this.service.updateIndex("0", "0"));
+        assertEquals("empty response body", exception.getMessage());
+        assertDoesNotThrow(() -> this.service.deleteIndex("0"));
     }
 
     @Test
