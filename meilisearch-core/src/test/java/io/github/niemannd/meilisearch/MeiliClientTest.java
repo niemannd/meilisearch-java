@@ -48,20 +48,20 @@ class MeiliClientTest {
 
     @Test
     void getIndex() {
-        assertEquals(IndexService.class, classToTest.index().getClass());
+        assertEquals(IndexService.class, classToTest.indexes().getClass());
     }
 
     @Test
     void getDocumentService() {
-        assertEquals(DocumentService.class, classToTest.documentService(Movie.class).getClass());
-        assertNull(classToTest.documentService(Object.class));
+        assertEquals(DocumentService.class, classToTest.documents(Movie.class).getClass());
+        assertNull(classToTest.documents(Object.class));
     }
 
     @Test
     void getDocumentServiceForIndex() {
         DocumentService<Movie> movies = classToTest.documentServiceForIndex("movies");
         assertNotNull(movies);
-        assertEquals(classToTest.documentService(Movie.class), movies);
+        assertEquals(classToTest.documents(Movie.class), movies);
 
         assertThrows(MeiliException.class, () -> classToTest.documentServiceForIndex("notexistingindex"));
 

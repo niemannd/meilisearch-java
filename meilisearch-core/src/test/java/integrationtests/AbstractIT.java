@@ -57,7 +57,7 @@ public abstract class AbstractIT {
         }
 
         setMasterKey();
-        client.index().createIndex(testIndexName);
+        client.indexes().createIndex(testIndexName);
 
         DocumentService<Movie> movieService = client.documentServiceForIndex(testIndexName);
         Update update = movieService.addDocument(data);
@@ -66,7 +66,7 @@ public abstract class AbstractIT {
 
     void tearDown() {
         setMasterKey();
-        client.index().deleteIndex(testIndexName);
+        client.indexes().deleteIndex(testIndexName);
     }
 
     private void setMasterKey() {

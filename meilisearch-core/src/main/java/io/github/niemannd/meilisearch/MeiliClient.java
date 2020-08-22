@@ -35,16 +35,16 @@ public class MeiliClient {
     }
 
     public MeiliClient(Configuration config, HttpClient client, JsonProcessor jsonProcessor) {
-        this(config,client,jsonProcessor,new DocumentServiceFactory());
+        this(config, client, jsonProcessor, new DocumentServiceFactory());
     }
 
-    public IndexService index() {
+    public IndexService indexes() {
         return indexService;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> DocumentService<T> documentService(Class<T> index) {
-        return (DocumentService<T>) documentServices.get(index);
+    public <T> DocumentService<T> documents(Class<T> documentType) {
+        return (DocumentService<T>) documentServices.get(documentType);
     }
 
     @SuppressWarnings("unchecked")
