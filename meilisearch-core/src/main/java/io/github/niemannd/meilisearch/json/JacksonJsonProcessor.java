@@ -3,6 +3,7 @@ package io.github.niemannd.meilisearch.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.MeiliJSONException;
 import org.slf4j.Logger;
 
@@ -25,7 +26,7 @@ public class JacksonJsonProcessor implements JsonProcessor {
     }
 
     @Override
-    public String serialize(Object o) throws MeiliJSONException {
+    public String serialize(Object o) throws MeiliException {
         if (o.getClass() == String.class) {
             return (String) o;
         }
@@ -38,7 +39,7 @@ public class JacksonJsonProcessor implements JsonProcessor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliJSONException {
+    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
         if (o == null) {
             throw new MeiliJSONException("String to deserialize is null");
         }

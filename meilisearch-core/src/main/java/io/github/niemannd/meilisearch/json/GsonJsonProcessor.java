@@ -1,5 +1,6 @@
 package io.github.niemannd.meilisearch.json;
 
+import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.MeiliJSONException;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -24,7 +25,7 @@ public class GsonJsonProcessor implements JsonProcessor {
     }
 
     @Override
-    public String serialize(Object o) throws MeiliJSONException {
+    public String serialize(Object o) throws MeiliException {
         if (o.getClass() == String.class) {
             return (String) o;
         }
@@ -37,7 +38,7 @@ public class GsonJsonProcessor implements JsonProcessor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliJSONException {
+    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
         if (o == null) {
             throw new MeiliJSONException("String to deserialize is null");
         }

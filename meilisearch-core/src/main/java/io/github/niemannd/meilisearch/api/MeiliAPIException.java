@@ -12,6 +12,10 @@ public class MeiliAPIException extends MeiliException {
         super(cause);
     }
 
+    public MeiliAPIException(String message) {
+        super(message);
+    }
+
     public MeiliError getError() {
         return error;
     }
