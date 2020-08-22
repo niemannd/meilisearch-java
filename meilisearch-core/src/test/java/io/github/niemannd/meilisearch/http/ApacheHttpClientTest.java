@@ -227,11 +227,11 @@ class ApacheHttpClientTest {
     }
 
     @Test
-    void queryStringgeneration() {
+    void queryStringGeneration() {
         HashMap<String, String> params = new HashMap<>();
         params.put("q", "Test Test Test");
         params.put("list", "blu,da,be,dee,da,be,dei");
-        params.put("asteriks", "*");
-        assertEquals("q=Test Test Test&asteriks=*&list=blu,da,be,dee,da,be,dei", classToTest.createQueryString(params));
+        params.put("asterisks", "*");
+        assertEquals("q=Test Test Test&asterisks=*&list=blu,da,be,dee,da,be,dei", classToTest.createQueryString(params));
     }
 }
