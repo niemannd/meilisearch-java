@@ -1,7 +1,5 @@
 package io.github.niemannd.meilisearch.api.documents;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
