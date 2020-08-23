@@ -3,6 +3,7 @@ package io.github.niemannd.meilisearch;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.DocumentService;
 import io.github.niemannd.meilisearch.api.index.IndexService;
+import io.github.niemannd.meilisearch.api.instance.InstanceServices;
 import io.github.niemannd.meilisearch.api.keys.KeyService;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.http.HttpClient;
@@ -17,6 +18,7 @@ public class MeiliClient {
 
     private final IndexService indexService;
     private final KeyService keyService;
+    private final InstanceServices instanceServices;
 
     private final HashMap<Class<?>, DocumentService<?>> documentServices = new HashMap<>();
 
@@ -24,6 +26,7 @@ public class MeiliClient {
         this.config = config;
         this.indexService = new IndexService(client, jsonProcessor);
         this.keyService = new KeyService(client, jsonProcessor);
+        this.instanceServices = new InstanceServices(client,jsonProcessor);
 
         Map<String, Class<?>> documentTypes = config.getDocumentTypes();
         for (String index : documentTypes.keySet()) {
@@ -62,5 +65,17 @@ public class MeiliClient {
 
     public Configuration getConfig() {
         return config;
+    }
+
+    public boolean isHealthy() {
+        return instanceServices.isHealthy();
+    }
+
+    public boolean setMaintenance(boolean maintenance) {
+        return instanceServices.setMaintenance(maintenance);
+    }
+
+    public Map<String,String> getVersion() {
+        return instanceServices.getVersion();
     }
 }
