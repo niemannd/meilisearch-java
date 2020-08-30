@@ -5,8 +5,11 @@ import com.openpojo.validation.Validator;
 import com.openpojo.validation.ValidatorBuilder;
 import com.openpojo.validation.rule.impl.GetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -20,6 +23,17 @@ class IndexEntityTest {
                 .build();
 
         validator.validate(PojoClassFactory.getPojoClass(Index.class));
+        validator.validate(PojoClassFactory.getPojoClass(Settings.class));
+    }
+
+    @Test
+    void settingsSynonyms() {
+        Settings settings = new Settings();
+        assertThat(settings.getSynonyms(), anEmptyMap());
+        settings.addSynonym("wolverine","xmen", "logan");
+        assertThat(settings.getSynonyms(), Matchers.aMapWithSize(1));
+        assertThat(settings.getSynonyms().keySet(), containsInAnyOrder("wolverine"));
+        assertThat(settings.getSynonyms().get("wolverine"), containsInAnyOrder("xmen", "logan"));
     }
 
     @Test

@@ -24,7 +24,7 @@ public class DocumentService<T> {
 
     public T getDocument(String identifier) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/documents/" + identifier;
-        String body = client.get(requestQuery, Collections.emptyMap());
+        String body = client.get(requestQuery, Collections.emptyMap()).getContent();
         return jsonProcessor.deserialize(body, config.mustGetDocumentType(indexName));
     }
 
@@ -34,13 +34,13 @@ public class DocumentService<T> {
 
     public List<T> getDocuments(int limit) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/documents?limit=" + limit;
-        String body = client.get(requestQuery, Collections.emptyMap());
+        String body = client.get(requestQuery, Collections.emptyMap()).getContent();
         return jsonProcessor.deserialize(body, List.class, config.mustGetDocumentType(indexName));
     }
 
     public Update addDocument(String data) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/documents";
-        String body = client.post(requestQuery, data);
+        String body = client.post(requestQuery, data).getContent();
         return jsonProcessor.deserialize(body, Update.class);
     }
 
@@ -60,39 +60,39 @@ public class DocumentService<T> {
 
     public Update updateDocument(String data) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/documents";
-        String body = client.put(requestQuery, Collections.emptyMap(), data);
+        String body = client.put(requestQuery, Collections.emptyMap(), data).getContent();
         return jsonProcessor.deserialize(body, Update.class);
     }
 
-    public boolean deleteDocument(String identifier) throws MeiliException {
+    public Update deleteDocument(String identifier) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/documents/" + identifier;
-        return client.delete(requestQuery);
+        return jsonProcessor.deserialize(client.delete(requestQuery).getContent(),Update.class);
     }
 
-    public boolean deleteDocuments() throws MeiliException {
+    public Update deleteDocuments() throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/documents";
-        return client.delete(requestQuery);
+        return jsonProcessor.deserialize(client.delete(requestQuery).getContent(),Update.class);
     }
 
     public SearchResponse<T> search(String q) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/search";
         SearchRequest sr = new SearchRequest(q);
-        return jsonProcessor.deserialize(client.post(requestQuery, sr), SearchResponse.class, config.mustGetDocumentType(indexName));
+        return jsonProcessor.deserialize(client.post(requestQuery, sr).getContent(), SearchResponse.class, config.mustGetDocumentType(indexName));
     }
 
     public SearchResponse<T> search(SearchRequest sr) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/search";
-        return jsonProcessor.deserialize(client.post(requestQuery, sr), SearchResponse.class, config.mustGetDocumentType(indexName));
+        return jsonProcessor.deserialize(client.post(requestQuery, sr).getContent(), SearchResponse.class, config.mustGetDocumentType(indexName));
     }
 
     public Update getUpdate(int updateId) throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/updates/" + updateId;
-        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()), Update.class);
+        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()).getContent(), Update.class);
     }
 
     public List<Update> getUpdates() throws MeiliException {
         String requestQuery = "/indexes/" + indexName + "/updates";
-        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()), List.class, Update.class);
+        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()).getContent(), List.class, Update.class);
     }
 
 }

@@ -45,14 +45,14 @@ public class IndexIntegrationTest extends AbstractIT {
         assertThrows(MeiliException.class, () -> client.indexes().createIndex(UUID.randomUUID().toString(), "test"));
         assertThrows(MeiliException.class, () -> client.indexes().updateIndex(UUID.randomUUID().toString(), "test"));
         assertThrows(MeiliException.class, () -> client.indexes().getIndex(UUID.randomUUID().toString()));
-        assertFalse(client.indexes().deleteIndex(UUID.randomUUID().toString()));
+        assertThrows(MeiliException.class, () -> client.indexes().deleteIndex(UUID.randomUUID().toString()));
         key.setKey("3b3bf839485f90453acc6159ba18fbed673ca88523093def11a9b4f4320e44a5");
         assertThrows(MeiliException.class, () -> client.indexes().getAllIndexes());
         assertThrows(MeiliException.class, () -> client.indexes().createIndex(UUID.randomUUID().toString()));
         assertThrows(MeiliException.class, () -> client.indexes().createIndex(UUID.randomUUID().toString(), "test"));
         assertThrows(MeiliException.class, () -> client.indexes().updateIndex(UUID.randomUUID().toString(), "test"));
         assertThrows(MeiliException.class, () -> client.indexes().getIndex(UUID.randomUUID().toString()));
-        assertFalse(client.indexes().deleteIndex(UUID.randomUUID().toString()));
+        assertThrows(MeiliException.class, () -> client.indexes().deleteIndex(UUID.randomUUID().toString()));
         key.setKey("8dcbb482663333d0280fa9fedf0e0c16d52185cb67db494ce4cd34da32ce2092");
         assertDoesNotThrow(() -> client.indexes().getAllIndexes());
         assertDoesNotThrow(() -> {
