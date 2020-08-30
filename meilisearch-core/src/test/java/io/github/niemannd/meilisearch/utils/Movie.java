@@ -1,6 +1,7 @@
 package io.github.niemannd.meilisearch.utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,6 +12,7 @@ public class Movie {
     private String poster;
     private String overview;
     @JsonProperty("release_date")
+    @SerializedName("release_date")
     private String releaseDate;
     private List<String> genre;
 

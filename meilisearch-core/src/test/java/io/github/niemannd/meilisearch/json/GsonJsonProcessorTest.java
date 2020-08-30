@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,9 +20,11 @@ class GsonJsonProcessorTest {
 
     @Test
     void serialize() {
-        when(gson.toJson(any(Movie.class))).thenThrow(new JsonParseException("this is a testexception"));
+        when(gson.toJson(any(Movie.class))).thenThrow(new JsonParseException("this is a testexception")).thenReturn("{\"id\":123,\"title\":\"TestTitel\",\"poster\":\"Poster\",\"overview\":\"overview\",\"release_date\":\"releaseDate\",\"genre\":[\"genre1\",\"genre2\"]}");
         assertEquals("test", classToTest.serialize("test"));
         assertThrows(MeiliJSONException.class, () -> classToTest.serialize(new Movie()));
+        String serialize = classToTest.serialize(new Movie(123, "TestTitel", "Poster", "overview", "releaseDate", "genre1", "genre2"));
+        assertEquals("{\"id\":123,\"title\":\"TestTitel\",\"poster\":\"Poster\",\"overview\":\"overview\",\"release_date\":\"releaseDate\",\"genre\":[\"genre1\",\"genre2\"]}", serialize);
     }
 
     @Test
@@ -50,6 +53,21 @@ class GsonJsonProcessorTest {
     void deserializeWithParametersEmpty() {
         when(gson.fromJson(any(String.class), any((Class.class)))).thenReturn(new Movie(), new Movie());
         assertNotNull(classToTest.deserialize("{}", Movie.class, null));
+        assertNotNull(classToTest.deserialize("{}", Movie.class));
         assertNotNull(classToTest.deserialize("{}", Movie.class, new Class[0]));
+    }
+
+    @Test
+    void deserializeWithParameters() {
+        String arr = "[{\"id\":123,\"title\":\"TestTitel\",\"poster\":\"Poster\",\"overview\":\"overview\",\"release_date\":\"releaseDate\",\"genre\":[\"genre1\",\"genre2\"]}]";
+        GsonJsonProcessor classForTest = new GsonJsonProcessor();
+        List<Movie> movies = classForTest.deserialize(arr, ArrayList.class, Movie.class);
+        assertNotNull(movies);
+        assertEquals(1, movies.size());
+        assertEquals(123, movies.get(0).getId());
+        assertEquals("TestTitel", movies.get(0).getTitle());
+        assertEquals("overview", movies.get(0).getOverview());
+        assertEquals("releaseDate", movies.get(0).getReleaseDate());
+        assertEquals("Poster", movies.get(0).getPoster());
     }
 }

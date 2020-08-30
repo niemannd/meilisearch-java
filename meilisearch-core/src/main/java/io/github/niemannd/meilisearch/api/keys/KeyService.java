@@ -19,6 +19,6 @@ public class KeyService {
 
     public Map<String, String> get() throws MeiliException {
         String requestQuery = "/keys";
-        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()), HashMap.class, String.class, String.class);
+        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()).getContent(), HashMap.class, String.class, String.class);
     }
 }

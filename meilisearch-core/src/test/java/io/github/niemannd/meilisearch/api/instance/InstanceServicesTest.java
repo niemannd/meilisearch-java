@@ -3,6 +3,7 @@ package io.github.niemannd.meilisearch.api.instance;
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.HttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ class InstanceServicesTest {
 
     @Test
     void isHealthy() {
-        when(client.get(any(), any())).thenReturn("").thenThrow(MeiliAPIException.class);
+        when(client.get(any(), any())).thenReturn(new HttpResponse(null, 200, "")).thenThrow(MeiliAPIException.class);
         assertTrue(classToTest.isHealthy());
         assertFalse(classToTest.isHealthy());
     }
@@ -30,7 +31,7 @@ class InstanceServicesTest {
     @Test
     void version() {
         when(client.get(any(), any()))
-                .thenReturn("{\"commitSha\":\"b46889b5f0f2f8b91438a08a358ba8f05fc09fc1\",\"buildDate\":\"2019-11-15T09:51:54.278247+00:00\",\"pkgVersion\":\"0.1.1\"}")
+                .thenReturn(new HttpResponse(null, 200, "{\"commitSha\":\"b46889b5f0f2f8b91438a08a358ba8f05fc09fc1\",\"buildDate\":\"2019-11-15T09:51:54.278247+00:00\",\"pkgVersion\":\"0.1.1\"}"))
                 .thenThrow(MeiliException.class);
         Map<String, String> version = classToTest.getVersion();
         assertNotNull(version);
@@ -47,7 +48,7 @@ class InstanceServicesTest {
 
     @Test
     void maintenance() {
-        when(client.put(any(), any(),any())).thenReturn("").thenThrow(MeiliException.class);
+        when(client.put(any(), any(), any())).thenReturn(new HttpResponse(null, 200, "")).thenThrow(MeiliException.class);
         assertTrue(classToTest.setMaintenance(true));
         assertFalse(classToTest.setMaintenance(true));
     }

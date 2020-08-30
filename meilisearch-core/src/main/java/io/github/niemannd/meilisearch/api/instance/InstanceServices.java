@@ -2,6 +2,7 @@ package io.github.niemannd.meilisearch.api.instance;
 
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.HttpResponse;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 
 import java.util.Collections;
@@ -37,8 +38,8 @@ public class InstanceServices {
 
     public Map<String, String> getVersion() {
         try {
-            String body = client.get("/version", Collections.emptyMap());
-            return processor.deserialize(body, HashMap.class, String.class, String.class);
+            HttpResponse response = client.get("/version", Collections.emptyMap());
+            return processor.deserialize(response.getContent(), HashMap.class, String.class, String.class);
         } catch (MeiliException e) {
             return Collections.emptyMap();
         }

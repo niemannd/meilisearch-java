@@ -49,8 +49,8 @@ public class GsonJsonProcessor implements JsonProcessor {
             if (parameters == null || parameters.length == 0) {
                 return (T) gson.fromJson(o, targetClass);
             } else {
-                Type[] types = Arrays.stream(parameters).map(aClass -> (Type) aClass).toArray(Type[]::new);
-                return gson.fromJson(o, TypeToken.getParameterized(targetClass, types).getType());
+                TypeToken<?> parameterized = TypeToken.getParameterized(targetClass, parameters);
+                return gson.fromJson(o, parameterized.getType());
             }
         } catch (JsonParseException e) {
             throw new MeiliJSONException("Error while deserializing: ", e);

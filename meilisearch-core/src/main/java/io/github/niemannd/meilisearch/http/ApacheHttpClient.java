@@ -16,10 +16,8 @@ import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.io.entity.BasicHttpEntity;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -47,19 +45,23 @@ public class ApacheHttpClient implements HttpClient {
                 .collect(Collectors.joining("&"));
     }
 
-    CloseableHttpResponse execute(ClassicHttpRequest request) throws MeiliException {
+    HttpResponse execute(ClassicHttpRequest request) throws MeiliException {
         Supplier<String> keySupplier = config.getKey();
         if (keySupplier != null && keySupplier.get() != null) {
             request.addHeader("X-Meili-API-Key", keySupplier.get());
         }
-        CloseableHttpResponse response;
+        HttpResponse response;
         try {
-            response = httpClient.execute(request);
-            int responseCode = response.getCode();
+            CloseableHttpResponse nativeResponse = httpClient.execute(request);
+            response = new HttpResponse(nativeResponse);
+            nativeResponse.close();
+            int responseCode = response.getStatusCode();
             if (responseCode < 200 || responseCode > 299) {
-                if (response.getEntity() != null) {
-                    MeiliError error = processor.deserialize(readEntity(response), MeiliError.class);
+                if(response.hasContent()) {
+                    MeiliError error = processor.deserialize(response.getContent(), MeiliError.class);
                     throw new MeiliAPIException(error.getMessage(), error);
+                } else {
+                    throw new MeiliAPIException("empty response without success code");
                 }
             }
         } catch (IOException e) {
@@ -68,72 +70,44 @@ public class ApacheHttpClient implements HttpClient {
         return response;
     }
 
-    String readEntity(CloseableHttpResponse response) throws IOException {
-        if (response.getEntity() == null) {
-            response.close();
-            throw new MeiliAPIException("empty response body");
-        }
-        String collect = new BufferedReader(new InputStreamReader(response.getEntity().getContent())).lines().collect(Collectors.joining());
-        response.close();
-        return collect;
+    @Override
+    public HttpResponse get(String path, Map<String, String> params) throws MeiliException {
+        String query = createQueryString(params);
+        HttpGet request = new HttpGet(this.config.getUrl() + path + "?" + query);
+        return execute(request);
     }
 
     @Override
-    public String get(String path, Map<String, String> params) throws MeiliException {
-        try {
-            String query = createQueryString(params);
-            HttpGet request = new HttpGet(this.config.getUrl() + path + "?" + query);
-            return readEntity(execute(request));
-        } catch (IOException e) {
-            throw new MeiliAPIException(e);
-        }
+    public <T> HttpResponse post(String path, T body) throws MeiliException {
+        HttpPost request = new HttpPost(this.config.getUrl() + path);
+        String requestBody = processor.serialize(body);
+        BasicHttpEntity basicHttpEntity = new BasicHttpEntity(
+                new ByteArrayInputStream(requestBody.getBytes()),
+                requestBody.getBytes().length,
+                ContentType.APPLICATION_JSON,
+                "UTF-8"
+        );
+        request.setEntity(basicHttpEntity);
+        return execute(request);
     }
 
     @Override
-    public <T> String post(String path, T body) throws MeiliException {
-        try {
-            HttpPost request = new HttpPost(this.config.getUrl() + path);
-            String requestBody = processor.serialize(body);
-            BasicHttpEntity basicHttpEntity = new BasicHttpEntity(
-                    new ByteArrayInputStream(requestBody.getBytes()),
-                    requestBody.getBytes().length,
-                    ContentType.APPLICATION_JSON,
-                    "UTF-8"
-            );
+    public <T> HttpResponse put(String path, Map<String, String> params, T body) throws MeiliException {
+        HttpPut request = new HttpPut(this.config.getUrl() + path);
+        params.forEach(request::addHeader);
+
+        BasicHttpEntity basicHttpEntity;
+        if (body != null) {
+            byte[] content = processor.serialize(body).getBytes();
+            basicHttpEntity = new BasicHttpEntity(new ByteArrayInputStream(content), content.length, ContentType.APPLICATION_JSON, "UTF-8");
             request.setEntity(basicHttpEntity);
-            CloseableHttpResponse execute = execute(request);
-            return readEntity(execute);
-        } catch (IOException e) {
-            throw new MeiliAPIException(e);
         }
+        return execute(request);
     }
 
     @Override
-    public <T> String put(String path, Map<String, String> params, T body) throws MeiliException {
-        try {
-            HttpPut request = new HttpPut(this.config.getUrl() + path);
-            params.forEach(request::addHeader);
-
-            BasicHttpEntity basicHttpEntity;
-            if (body != null) {
-                byte[] content = processor.serialize(body).getBytes();
-                basicHttpEntity = new BasicHttpEntity(new ByteArrayInputStream(content), content.length, ContentType.APPLICATION_JSON, "UTF-8");
-                request.setEntity(basicHttpEntity);
-            }
-            return readEntity(execute(request));
-        } catch (IOException e) {
-            throw new MeiliAPIException(e);
-        }
-    }
-
-    @Override
-    public boolean delete(String path) {
-        try {
-            HttpDelete request = new HttpDelete(this.config.getUrl() + path);
-            int code = execute(request).getCode();
-            return code > 199 && code < 300;
-        } catch (MeiliAPIException e) {
-            return false;
-        }
+    public HttpResponse delete(String path) throws MeiliException {
+        HttpDelete request = new HttpDelete(this.config.getUrl() + path);
+        return execute(request);
     }
 }

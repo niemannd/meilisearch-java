@@ -17,7 +17,9 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.MinimalHttpClient;
 import org.apache.hc.core5.http.*;
 import org.apache.hc.core5.http.io.entity.BasicHttpEntity;
+import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,13 +31,19 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ApacheHttpClientTest {
     private final JacksonJsonProcessor processor = new JacksonJsonProcessor();
-    private final Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(() -> "masterKey").build();
+    private Supplier<String> keySupplier = () -> "masterKey";
+    private final Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(keySupplier).build();
+
     private final MinimalHttpClient client = mock(MinimalHttpClient.class);
     private final ApacheHttpClient classToTest = new ApacheHttpClient(client, config, processor);
     private final IndexService service = new IndexService(classToTest, processor);
@@ -47,7 +55,7 @@ class ApacheHttpClientTest {
     void setUp() throws IOException {
         requests.clear();
         responses.clear();
-        when(client.execute(any(ClassicHttpRequest.class))).then(invocationOnMock -> {
+        when(client.execute(any())).then(invocationOnMock -> {
             requests.add(invocationOnMock.getArgument(0));
             return responses.poll();
         }).then(invocationOnMock -> {
@@ -63,8 +71,7 @@ class ApacheHttpClientTest {
             Method adaptMethod = Class.forName("org.apache.hc.client5.http.impl.classic.CloseableHttpResponse")
                     .getDeclaredMethod("adapt", ClassicHttpResponse.class);
             adaptMethod.setAccessible(true);
-            return (CloseableHttpResponse) adaptMethod
-                    .invoke(null, request);
+            return (CloseableHttpResponse) adaptMethod.invoke(null, request);
         } catch (NoSuchMethodException | ClassNotFoundException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -111,20 +118,20 @@ class ApacheHttpClientTest {
         when(entity.getContent()).thenAnswer(invocationOnMock -> new ByteArrayInputStream(message.getBytes()));
         when(mock.getCode()).thenReturn(200);
         when(mock.getEntity()).thenReturn(entity);
+
+        when(mock.getHeaders()).thenReturn(Stream.of(new BasicHeader("name1", "test"), new BasicHeader("name2", "test")).toArray(Header[]::new));
+
         doThrow(new IOException(message)).when(mock).close();
         reset(client);
-        when(client.execute(any(ClassicHttpRequest.class))).then(invocationOnMock -> {
+        when(client.execute(any())).then(invocationOnMock -> {
             requests.add(invocationOnMock.getArgument(0));
             return responses.poll();
         });
         responses.addAll(Arrays.asList(mock, mock, mock));
 
-        MeiliAPIException meiliAPIException = assertThrows(MeiliAPIException.class, () -> this.service.createIndex("0"));
-        assertEquals(message, meiliAPIException.getCause().getMessage());
-        meiliAPIException = assertThrows(MeiliAPIException.class, () -> this.service.getIndex("0"));
-        assertEquals(message, meiliAPIException.getCause().getMessage());
-        meiliAPIException = assertThrows(MeiliAPIException.class, () -> this.service.updateIndex("0", "0"));
-        assertEquals(message, meiliAPIException.getCause().getMessage());
+        assertThrows(MeiliAPIException.class, () -> this.service.createIndex("0"));
+        assertThrows(MeiliAPIException.class, () -> this.service.getIndex("0"));
+        assertThrows(MeiliAPIException.class, () -> this.service.updateIndex("0", "0"));
     }
 
     @Test
@@ -132,21 +139,22 @@ class ApacheHttpClientTest {
         CloseableHttpResponse mock = mock(CloseableHttpResponse.class);
         when(mock.getCode()).thenReturn(404);
         when(mock.getEntity()).thenReturn(null);
+        when(mock.getHeaders()).thenReturn(new Header[0]);
         responses.addAll(Arrays.asList(mock, mock, mock, mock));
 
         reset(client);
-        when(client.execute(any(ClassicHttpRequest.class))).thenAnswer(invocationOnMock -> {
+        when(client.execute(any())).thenAnswer(invocationOnMock -> {
             requests.add(invocationOnMock.getArgument(0));
             return responses.poll();
         });
 
         MeiliAPIException exception = assertThrows(MeiliAPIException.class, () -> this.service.createIndex("0"));
-        assertEquals("empty response body", exception.getMessage());
+        assertEquals("empty response without success code", exception.getMessage());
         exception = assertThrows(MeiliAPIException.class, () -> this.service.getIndex("0"));
-        assertEquals("empty response body", exception.getMessage());
+        assertEquals("empty response without success code", exception.getMessage());
         exception = assertThrows(MeiliAPIException.class, () -> this.service.updateIndex("0", "0"));
-        assertEquals("empty response body", exception.getMessage());
-        assertDoesNotThrow(() -> this.service.deleteIndex("0"));
+        assertEquals("empty response without success code", exception.getMessage());
+        assertThrows(MeiliAPIException.class, () -> this.service.deleteIndex("0"));
     }
 
     @Test
@@ -199,31 +207,31 @@ class ApacheHttpClientTest {
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpDelete.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
-        assertFalse(service.deleteIndex("movies"));
+        assertThrows(MeiliException.class, () -> service.deleteIndex("movies"));
     }
 
     @Test
     void delete100() {
         responses.add(this.getResponse(100, null));
-        assertFalse(service.deleteIndex("movies"));
+        assertThrows(MeiliAPIException.class, () -> service.deleteIndex("movies"));
         ClassicHttpRequest request = requests.poll();
         assertNotNull(request);
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpDelete.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
-        assertFalse(service.deleteIndex("movies"));
+        assertThrows(MeiliAPIException.class, () -> service.deleteIndex("movies"));
     }
 
     @Test
     void delete404() {
         responses.add(this.getResponse(404, null));
-        assertFalse(service.deleteIndex("movies"));
+        assertThrows(MeiliAPIException.class, () -> service.deleteIndex("movies"));
         ClassicHttpRequest request = requests.poll();
         assertNotNull(request);
         assertEquals("/indexes/movies", request.getRequestUri());
         assertEquals(HttpDelete.class, request.getClass());
         assertEquals("masterKey", request.getFirstHeader("X-Meili-API-Key").getValue());
-        assertFalse(service.deleteIndex("movies"));
+        assertThrows(MeiliAPIException.class, () -> service.deleteIndex("movies"));
     }
 
     @Test
@@ -233,5 +241,63 @@ class ApacheHttpClientTest {
         params.put("list", "blu,da,be,dee,da,be,dei");
         params.put("asterisks", "*");
         assertEquals("q=Test Test Test&asterisks=*&list=blu,da,be,dee,da,be,dei", classToTest.createQueryString(params));
+    }
+
+    @Test
+    void keySupplier() throws IOException {
+        reset(client);
+        when(client.execute(any())).thenAnswer(invocationOnMock -> {
+            requests.add(invocationOnMock.getArgument(0));
+            return responses.poll();
+        });
+        responses.add(this.getResponse(200, "{}"));
+        BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
+        HttpResponse execute = classToTest.execute(dummyRequest);
+        assertThat(execute, notNullValue());
+        assertThat(execute.getStatusCode(), is(200));
+        assertThat(execute.getContent(), is("{}"));
+
+        ClassicHttpRequest request = requests.poll();
+        assertThat(request, notNullValue());
+        assertThat(request.getFirstHeader("X-Meili-API-Key").getValue(), is("masterKey"));
+    }
+
+    @Test
+    void keySupplierNull() {
+        BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
+        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(null).build();
+        ApacheHttpClient classForTest = new ApacheHttpClient(client, config, processor);
+
+        responses.add(this.getResponse(200, "{}"));
+        classForTest.execute(dummyRequest);
+        ClassicHttpRequest request = requests.poll();
+        assertThat(request, notNullValue());
+        assertThat(request.getFirstHeader("X-Meili-API-Key"), nullValue());
+    }
+
+    @Test
+    void keySupplierGetNull() {
+        BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
+        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(() -> null).build();
+        ApacheHttpClient classForTest = new ApacheHttpClient(client, config, processor);
+
+        responses.add(this.getResponse(200, "{}"));
+        classForTest.execute(dummyRequest);
+        ClassicHttpRequest request = requests.poll();
+        assertThat(request, notNullValue());
+        assertThat(request.getFirstHeader("X-Meili-API-Key"), nullValue());
+    }
+
+    @Test
+    void defaultKeySupplier() {
+        BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
+        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").build();
+        ApacheHttpClient classForTest = new ApacheHttpClient(client, config, processor);
+
+        responses.add(this.getResponse(200, "{}"));
+        classForTest.execute(dummyRequest);
+        ClassicHttpRequest request = requests.poll();
+        assertThat(request, notNullValue());
+        assertThat(request.getFirstHeader("X-Meili-API-Key"), nullValue());
     }
 }
