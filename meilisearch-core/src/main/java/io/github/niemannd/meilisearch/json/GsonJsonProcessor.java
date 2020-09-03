@@ -38,7 +38,7 @@ public class GsonJsonProcessor implements JsonProcessor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
+    public <T> T deserialize(Object o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
         if (o == null) {
             throw new MeiliJSONException("String to deserialize is null");
         }
@@ -47,10 +47,10 @@ public class GsonJsonProcessor implements JsonProcessor {
         }
         try {
             if (parameters == null || parameters.length == 0) {
-                return (T) gson.fromJson(o, targetClass);
+                return (T) gson.fromJson((String) o, targetClass);
             } else {
                 TypeToken<?> parameterized = TypeToken.getParameterized(targetClass, parameters);
-                return gson.fromJson(o, parameterized.getType());
+                return gson.fromJson((String) o, parameterized.getType());
             }
         } catch (JsonParseException e) {
             throw new MeiliJSONException("Error while deserializing: ", e);

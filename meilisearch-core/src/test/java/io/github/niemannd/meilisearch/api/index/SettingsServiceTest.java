@@ -3,8 +3,9 @@ package io.github.niemannd.meilisearch.api.index;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.niemannd.meilisearch.api.documents.Update;
+import io.github.niemannd.meilisearch.http.ApacheHttpClient;
+import io.github.niemannd.meilisearch.http.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
-import io.github.niemannd.meilisearch.http.HttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
@@ -17,13 +18,13 @@ import static org.mockito.Mockito.when;
 
 class SettingsServiceTest {
 
-    private final HttpClient client = mock(HttpClient.class);
+    private final HttpClient<String> client = mock(ApacheHttpClient.class);
     private final JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
     private final SettingsService classToTest = new SettingsService(client, processor);
 
     @Test
     void getSettings() {
-        when(client.get(any(), any())).thenReturn(new HttpResponse(null, 200, "{\"rankingRules\":[\"typo\",\"words\",\"proximity\",\"attribute\",\"wordsPosition\",\"exactness\",\"desc(release_date)\"],\"attributesForFaceting\":[\"genre\"],\"distinctAttribute\":null,\"searchableAttributes\":[\"title\",\"description\",\"uid\"],\"displayedAttributes\":[\"title\",\"description\",\"release_date\",\"rank\",\"poster\"],\"stopWords\":null,\"synonyms\":{\"wolverine\":[\"xmen\",\"logan\"],\"logan\":[\"wolverine\",\"xmen\"]}}"));
+        when(client.get(any(), any())).thenReturn(new BasicHttpResponse(null, 200, "{\"rankingRules\":[\"typo\",\"words\",\"proximity\",\"attribute\",\"wordsPosition\",\"exactness\",\"desc(release_date)\"],\"attributesForFaceting\":[\"genre\"],\"distinctAttribute\":null,\"searchableAttributes\":[\"title\",\"description\",\"uid\"],\"displayedAttributes\":[\"title\",\"description\",\"release_date\",\"rank\",\"poster\"],\"stopWords\":null,\"synonyms\":{\"wolverine\":[\"xmen\",\"logan\"],\"logan\":[\"wolverine\",\"xmen\"]}}"));
         Settings test = classToTest.getSettings("test");
         assertThat(test, notNullValue());
         assertThat(test.getSynonyms(), notNullValue());
@@ -40,7 +41,7 @@ class SettingsServiceTest {
 
     @Test
     void updateSettings() throws JsonProcessingException {
-        when(client.post(any(), any())).thenReturn(new HttpResponse(null, 200, "{\"updateId\": 1}"));
+        when(client.post(any(), any())).thenReturn(new BasicHttpResponse(null, 200, "{\"updateId\": 1}"));
         Settings settings = new ObjectMapper().readValue("{\"rankingRules\":[\"typo\",\"words\",\"proximity\",\"attribute\",\"wordsPosition\",\"exactness\",\"desc(release_date)\"],\"attributesForFaceting\":[\"genre\"],\"distinctAttribute\":null,\"searchableAttributes\":[\"title\",\"description\",\"uid\"],\"displayedAttributes\":[\"title\",\"description\",\"release_date\",\"rank\",\"poster\"],\"stopWords\":null,\"synonyms\":{\"wolverine\":[\"xmen\",\"logan\"],\"logan\":[\"wolverine\",\"xmen\"]}}", Settings.class);
         Update test = classToTest.updateSettings("test", settings);
         assertThat(test, notNullValue());
@@ -49,7 +50,7 @@ class SettingsServiceTest {
 
     @Test
     void resetSettings() {
-        when(client.delete(any())).thenReturn(new HttpResponse(null, 200, "{\"updateId\": 1}"));
+        when(client.delete(any())).thenReturn(new BasicHttpResponse(null, 200, "{\"updateId\": 1}"));
         Update test = classToTest.resetSettings("test");
         assertThat(test, notNullValue());
         assertThat(test.getUpdateId(), is(1));

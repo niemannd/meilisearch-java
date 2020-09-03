@@ -9,17 +9,18 @@ import java.util.Collections;
 
 public class SettingsService {
 
-    private final HttpClient client;
+    private final HttpClient<?> client;
     private final JsonProcessor jsonProcessor;
 
-    public SettingsService(HttpClient client, JsonProcessor jsonProcessor) {
+    public SettingsService(HttpClient<?> client, JsonProcessor jsonProcessor) {
         this.client = client;
         this.jsonProcessor = jsonProcessor;
     }
 
     public Settings getSettings(String index) throws MeiliException {
-        String body = client.get("/indexes/" + index + "/settings", Collections.emptyMap()).getContent();
-        return jsonProcessor.deserialize(body, Settings.class);
+        return jsonProcessor.deserialize(
+                client.get("/indexes/" + index + "/settings", Collections.emptyMap()).getContent(), Settings.class
+        );
     }
 
     public Update updateSettings(String index, Settings settings) throws MeiliException {

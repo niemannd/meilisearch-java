@@ -2,18 +2,10 @@ package io.github.niemannd.meilisearch.http;
 
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.ClassicHttpResponse;
-import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.io.entity.BasicHttpEntity;
-import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,12 +17,12 @@ import static org.mockito.Mockito.when;
 
 class HttpResponseTest {
 
-    private HttpResponse classToTest;
+    private BasicHttpResponse classToTest;
 
     public HttpResponseTest() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Test", "TestTest");
-        classToTest = new HttpResponse(headers, 200, "{}");
+        classToTest = new BasicHttpResponse(headers, 200, "{}");
     }
 
     @Test
@@ -63,6 +55,6 @@ class HttpResponseTest {
         when(response.getEntity()).thenAnswer(invocationOnMock -> {
             throw new IOException("oh boy!");
         });
-        assertThrows(MeiliAPIException.class, () -> new HttpResponse(response));
+        assertThrows(MeiliAPIException.class, () -> new BasicHttpResponse(response));
     }
 }

@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ApacheHttpClient implements HttpClient {
+public class ApacheHttpClient implements HttpClient<String> {
 
     private final CloseableHttpClient httpClient;
     private final Configuration config;
@@ -45,15 +45,15 @@ public class ApacheHttpClient implements HttpClient {
                 .collect(Collectors.joining("&"));
     }
 
-    HttpResponse execute(ClassicHttpRequest request) throws MeiliException {
+    HttpResponse<String>execute(ClassicHttpRequest request) throws MeiliException {
         Supplier<String> keySupplier = config.getKey();
         if (keySupplier != null && keySupplier.get() != null) {
             request.addHeader("X-Meili-API-Key", keySupplier.get());
         }
-        HttpResponse response;
+        BasicHttpResponse response;
         try {
             CloseableHttpResponse nativeResponse = httpClient.execute(request);
-            response = new HttpResponse(nativeResponse);
+            response = new BasicHttpResponse(nativeResponse);
             nativeResponse.close();
             int responseCode = response.getStatusCode();
             if (responseCode < 200 || responseCode > 299) {
@@ -71,14 +71,14 @@ public class ApacheHttpClient implements HttpClient {
     }
 
     @Override
-    public HttpResponse get(String path, Map<String, String> params) throws MeiliException {
+    public HttpResponse<String> get(String path, Map<String, String> params) throws MeiliException {
         String query = createQueryString(params);
         HttpGet request = new HttpGet(this.config.getUrl() + path + "?" + query);
         return execute(request);
     }
 
     @Override
-    public <T> HttpResponse post(String path, T body) throws MeiliException {
+    public <T> HttpResponse<String> post(String path, T body) throws MeiliException {
         HttpPost request = new HttpPost(this.config.getUrl() + path);
         String requestBody = processor.serialize(body);
         BasicHttpEntity basicHttpEntity = new BasicHttpEntity(
@@ -92,7 +92,7 @@ public class ApacheHttpClient implements HttpClient {
     }
 
     @Override
-    public <T> HttpResponse put(String path, Map<String, String> params, T body) throws MeiliException {
+    public <T> HttpResponse<String> put(String path, Map<String, String> params, T body) throws MeiliException {
         HttpPut request = new HttpPut(this.config.getUrl() + path);
         params.forEach(request::addHeader);
 
@@ -106,7 +106,7 @@ public class ApacheHttpClient implements HttpClient {
     }
 
     @Override
-    public HttpResponse delete(String path) throws MeiliException {
+    public HttpResponse<String> delete(String path) throws MeiliException {
         HttpDelete request = new HttpDelete(this.config.getUrl() + path);
         return execute(request);
     }

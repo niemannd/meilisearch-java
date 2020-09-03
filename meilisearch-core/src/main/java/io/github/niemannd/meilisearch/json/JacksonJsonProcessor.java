@@ -39,7 +39,7 @@ public class JacksonJsonProcessor implements JsonProcessor {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T deserialize(String o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
+    public <T> T deserialize(Object o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
         if (o == null) {
             throw new MeiliJSONException("String to deserialize is null");
         }
@@ -48,9 +48,9 @@ public class JacksonJsonProcessor implements JsonProcessor {
         }
         try {
             if (parameters == null || parameters.length == 0) {
-                return (T) mapper.readValue(o, targetClass);
+                return (T) mapper.readValue((String) o, targetClass);
             } else {
-                return mapper.readValue(o, mapper.getTypeFactory().constructParametricType(targetClass, parameters));
+                return mapper.readValue((String) o, mapper.getTypeFactory().constructParametricType(targetClass, parameters));
             }
         } catch (IOException e) {
             throw new MeiliJSONException("Error while serializing: ", e);

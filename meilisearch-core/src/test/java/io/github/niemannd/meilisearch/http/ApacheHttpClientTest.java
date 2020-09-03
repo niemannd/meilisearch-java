@@ -252,7 +252,7 @@ class ApacheHttpClientTest {
         });
         responses.add(this.getResponse(200, "{}"));
         BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
-        HttpResponse execute = classToTest.execute(dummyRequest);
+        HttpResponse<String>execute = classToTest.execute(dummyRequest);
         assertThat(execute, notNullValue());
         assertThat(execute.getStatusCode(), is(200));
         assertThat(execute.getContent(), is("{}"));

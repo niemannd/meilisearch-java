@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class KeyService {
     private final JsonProcessor jsonProcessor;
-    private final HttpClient client;
+    private final HttpClient<?> client;
 
-    public KeyService(HttpClient client, JsonProcessor jsonProcessor) {
+    public KeyService(HttpClient<?> client, JsonProcessor jsonProcessor) {
         this.jsonProcessor = jsonProcessor;
         this.client = client;
     }

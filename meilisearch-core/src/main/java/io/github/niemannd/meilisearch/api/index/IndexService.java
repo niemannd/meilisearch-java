@@ -10,17 +10,17 @@ import java.util.HashMap;
 
 public class IndexService {
 
-    private final HttpClient client;
+    private final HttpClient<?> client;
     private final JsonProcessor jsonProcessor;
     private final SettingsService settingsService;
 
-    public IndexService(HttpClient client, JsonProcessor jsonProcessor, SettingsService settingsService) {
+    public IndexService(HttpClient<?> client, JsonProcessor jsonProcessor, SettingsService settingsService) {
         this.client = client;
         this.jsonProcessor = jsonProcessor;
         this.settingsService = settingsService;
     }
 
-    public IndexService(HttpClient client, JsonProcessor jsonProcessor) throws MeiliException {
+    public IndexService(HttpClient<?> client, JsonProcessor jsonProcessor) throws MeiliException {
         this(client, jsonProcessor, new SettingsService(client, jsonProcessor));
     }
 
@@ -33,8 +33,10 @@ public class IndexService {
         params.put("uid", uid);
         if (primaryKey != null)
             params.put("primaryKey", primaryKey);
-        String content = client.post("/indexes", params).getContent();
-        return jsonProcessor.deserialize(content, Index.class);
+        return jsonProcessor.deserialize(
+                client.post("/indexes", params).getContent(),
+                Index.class
+        );
     }
 
     public Index getIndex(String uid) throws MeiliException {
@@ -50,8 +52,10 @@ public class IndexService {
         String requestQuery = "/indexes/" + uid;
         HashMap<String, String> body = new HashMap<>();
         body.put("primaryKey", primaryKey);
-        String content = client.put(requestQuery, Collections.emptyMap(), body).getContent();
-        return jsonProcessor.deserialize(content, Index.class);
+        return jsonProcessor.deserialize(
+                client.put(requestQuery, Collections.emptyMap(), body).getContent(),
+                Index.class
+        );
     }
 
     public boolean deleteIndex(String uid) throws MeiliException {
