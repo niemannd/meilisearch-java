@@ -1,9 +1,9 @@
 # MeiliSearch Java
 
-![GitHub](https://img.shields.io/github/license/niemannd/meilisearch-java) 
-![maven test](https://github.com/niemannd/meilisearch-java/workflows/maven%20test/badge.svg) 
-[![codecov](https://codecov.io/gh/niemannd/meilisearch-java/branch/master/graph/badge.svg)](https://codecov.io/gh/niemannd/meilisearch-java)  
-[![](https://jitpack.io/v/niemannd/meilisearch-java.svg)](https://jitpack.io/#niemannd/meilisearch-java)
+![GitHub](https://img.shields.io/github/license/niemannd/meilisearch-java)
+![maven test](https://github.com/niemannd/meilisearch-java/workflows/maven%20test/badge.svg)
+[![codecov](https://codecov.io/gh/niemannd/meilisearch-java/branch/master/graph/badge.svg)](https://codecov.io/gh/niemannd/meilisearch-java)  [![](https://jitpack.io/v/niemannd/meilisearch-java.svg)](https://jitpack.io/#niemannd/meilisearch-java)   
+
 
 | Important!: this project is still WIP and not recommended for production |
 | --- |
@@ -20,20 +20,18 @@ Until i decide this project is stable enough for maven-central, please use jitpa
 
 Step 1. Add the JitPack repository to your build file
 ```xml
-	<repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
+<repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+</repository>
 ```
 Step 2. Add the dependency
 ```xml
-	<dependency>
-	    <groupId>com.github.niemannd.meilisearch-java</groupId>
-	    <artifactId>meilisearch-core</artifactId>
-	    <version>0.1.0</version>
-	</dependency>
+<dependency>
+    <groupId>com.github.niemannd.meilisearch-java</groupId>
+    <artifactId>meilisearch-core</artifactId>
+    <version>0.1.0</version>
+</dependency>
 ```
 ## Getting started
 
@@ -41,42 +39,44 @@ Step 2. Add the dependency
 public final class Example {
   
   public static void main(String args[]) throws Exception {
-    Configuration config = new ConfigurationBuilder()
+        Configuration config = new ConfigurationBuilder()
                 .setUrl("http://localhost:7700")
                 .setKey(() -> "masterKey")
                 .addDocumentType("movies", Movie.class)
                 .build();
 
-    JacksonJsonProcessor processor = new JacksonJsonProcessor();
-    ApacheHttpClient httpClient = new ApacheHttpClient(config, processor);
-    MeiliClient meiliClient = new MeiliClient(config, httpClient, processor);
+        JacksonJsonProcessor processor = new JacksonJsonProcessor();
+        ApacheHttpClient httpClient = new ApacheHttpClient(config, processor);
+        MeiliClient client = new MeiliClient(config, httpClient, processor);
+        client.indexes().createIndex("movies");
 
-    
-    meiliClient.index().createIndex("movies");
-    
-    // add documents directly via string
-    DocumentService<Movie> movieService = classToTest.documentService(Movie.class);
-    Update update = movieService.addDocument("[{\"id\":287947,\"title\":\"Shazam\",\"poster\":\"https://image.tmdb.org/t/p/w1280/xnopI5Xtky18MPhK40cZAGAOVeV.jpg\",\"overview\":\"Shazam\",\"release_date\":\"2019-03-23\"}]");
- 
-    //or via document list
-    List<Movie> movieList = new ArrayList();
-    movieList.add(new Movie(...));
-    Update update = movieService.addDocument(movieList);
+        // add documents directly via string
+        DocumentService<Movie> movieService = client.documents(Movie.class);
+        Update update = movieService.addDocument("[{\"id\":287947,\"title\":\"Shazam\"}]");
 
-    // wait for the update to finish
-    boolean updateFinished = false;
-    do {
-        updateFinished = "processed".equalsIgnoreCase(movieService.getUpdate(update.getUpdateId()).getStatus());
-        Thread.sleep(500);
-    } while (!updateFinished);
-    
-    SearchResult<Movie> result = movieService.search("Shazam");
-    
+        //or via document list
+        List<Movie> movieList = new ArrayList();
+        movieList.add(new Movie(1, "Shazam"));
+        update = movieService.addDocument(movieList);
+
+        // wait for the update to finish
+        boolean updateFinished = false;
+        do {
+            updateFinished = "processed".equalsIgnoreCase(movieService.getUpdate(update.getUpdateId()).getStatus());
+            Thread.sleep(500);
+        } while (!updateFinished);
+
+        SearchResponse<Movie> result = movieService.search("Shazam");
   }
   
   public static class Movie {
     private int id;
     private String title;
+
+    public Movie(float id, String title) {
+        this.id = id;
+        this.title = title;
+    }
   }
 }
 ```
