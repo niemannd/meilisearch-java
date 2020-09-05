@@ -3,6 +3,7 @@
 ![GitHub](https://img.shields.io/github/license/niemannd/meilisearch-java) 
 ![maven test](https://github.com/niemannd/meilisearch-java/workflows/maven%20test/badge.svg) 
 [![codecov](https://codecov.io/gh/niemannd/meilisearch-java/branch/master/graph/badge.svg)](https://codecov.io/gh/niemannd/meilisearch-java)  
+[![](https://jitpack.io/v/niemannd/meilisearch-java.svg)](https://jitpack.io/#niemannd/meilisearch-java)
 
 | Important!: this project is still WIP and not recommended for production |
 | --- |
@@ -17,23 +18,22 @@ are highly customizable. Features such as typo-tolerance, filters, and synonyms 
 
 Until i decide this project is stable enough for maven-central, please use jitpack.io.
 
+Step 1. Add the JitPack repository to your build file
 ```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 ```
-
+Step 2. Add the dependency
 ```xml
-<dependencies>
-    <dependency>
-        <groupId>io.github.niemannd</groupId>
-        <artifactId>meilisearch-core</artifactId>
-        <version>master-SNAPSHOT</version>
-    </dependency>
-</dependencies>
+	<dependency>
+	    <groupId>com.github.niemannd.meilisearch-java</groupId>
+	    <artifactId>meilisearch-core</artifactId>
+	    <version>0.1.0</version>
+	</dependency>
 ```
 ## Getting started
 
@@ -75,7 +75,8 @@ public final class Example {
   }
   
   public static class Movie {
-    private String id;
+    private int id;
+    private String title;
   }
 }
 ```
