@@ -1,19 +1,12 @@
 package io.github.niemannd.meilisearch.json;
 
-import io.github.niemannd.meilisearch.api.MeiliException;
-import io.github.niemannd.meilisearch.api.MeiliJSONException;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
-import org.slf4j.Logger;
-
-import java.lang.reflect.Type;
-import java.util.Arrays;
-
-import static org.slf4j.LoggerFactory.getLogger;
+import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.api.MeiliJSONException;
 
 public class GsonJsonProcessor implements JsonProcessor {
-    private static final Logger log = getLogger(GsonJsonProcessor.class);
     private final Gson gson;
 
     public GsonJsonProcessor() {
@@ -24,6 +17,10 @@ public class GsonJsonProcessor implements JsonProcessor {
         this.gson = gson;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String serialize(Object o) throws MeiliException {
         if (o.getClass() == String.class) {
@@ -36,6 +33,9 @@ public class GsonJsonProcessor implements JsonProcessor {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> T deserialize(Object o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {

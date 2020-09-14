@@ -24,14 +24,29 @@ public class Configuration {
         return key;
     }
 
+    /**
+     *
+     * @return the indexname-to-class mapping in an unmodifiable map
+     */
     public Map<String, Class<?>> getDocumentTypes() {
         return Collections.unmodifiableMap(this.documentTypes);
     }
 
+    /**
+     *
+     * @param index the index name as String
+     * @return an Optional<CLass<?>> of resolved Class
+     */
     public Optional<Class<?>> getDocumentType(String index) {
         return Optional.ofNullable(documentTypes.get(index));
     }
 
+    /**
+     *
+     * @param index the index name as String
+     * @return the mapped class
+     * @throws DocumentTypeNotFoundException in case there is no mapping for the index
+     */
     public Class<?> mustGetDocumentType(String index) {
         if (!documentTypes.containsKey(index)) {
             throw new DocumentTypeNotFoundException(index);

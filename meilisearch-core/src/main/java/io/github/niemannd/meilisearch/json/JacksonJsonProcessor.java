@@ -5,26 +5,32 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.MeiliJSONException;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 public class JacksonJsonProcessor implements JsonProcessor {
-    private static final Logger log = getLogger(JacksonJsonProcessor.class);
 
     private final ObjectMapper mapper;
 
+    /**
+     * this constructor uses a default ObjectMapper with enabled 'FAIL_ON_UNKNOWN_PROPERTIES' feature.
+     */
     public JacksonJsonProcessor() {
         this.mapper = new ObjectMapper();
         this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
+    /**
+     *
+     * @param mapper ObjectMapper
+     */
     public JacksonJsonProcessor(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String serialize(Object o) throws MeiliException {
         if (o.getClass() == String.class) {
@@ -37,6 +43,9 @@ public class JacksonJsonProcessor implements JsonProcessor {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <T> T deserialize(Object o, Class<?> targetClass, Class<?>... parameters) throws MeiliException {
