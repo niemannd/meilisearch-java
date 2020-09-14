@@ -17,6 +17,11 @@ public class InstanceServices {
         this.processor = processor;
     }
 
+    /**
+     *
+     * @param maintenance true if maintenance should be enabled, false to disable maintenance
+     * @return false in case of an error, otherwise true
+     */
     public boolean setMaintenance(boolean maintenance) {
         try {
             client.put("/health", Collections.emptyMap(), Collections.singletonMap("health", maintenance));
@@ -26,6 +31,10 @@ public class InstanceServices {
         }
     }
 
+    /**
+     *
+     * @return true if everything is ok, false if meilisearch is in maintenance mode
+     */
     public boolean isHealthy() {
         try {
             client.get("/health", Collections.emptyMap());
@@ -35,6 +44,10 @@ public class InstanceServices {
         }
     }
 
+    /**
+     *
+     * @return a map with version information of meilisearch
+     */
     public Map<String, String> getVersion() {
         try {
             return processor.deserialize(

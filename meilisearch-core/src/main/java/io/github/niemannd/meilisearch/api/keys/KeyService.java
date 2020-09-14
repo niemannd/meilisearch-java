@@ -17,6 +17,11 @@ public class KeyService {
         this.client = client;
     }
 
+    /**
+     *
+     * @return the public and private keys in a map
+     * @throws MeiliException in case some error happens
+     */
     public Map<String, String> get() throws MeiliException {
         String requestQuery = "/keys";
         return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()).getContent(), HashMap.class, String.class, String.class);
