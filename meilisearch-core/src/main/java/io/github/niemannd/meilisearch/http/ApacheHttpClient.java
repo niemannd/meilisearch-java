@@ -4,6 +4,8 @@ import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliError;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.config.Configuration;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
+import io.github.niemannd.meilisearch.http.response.HttpResponse;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -45,7 +47,7 @@ public class ApacheHttpClient implements HttpClient<String> {
                 .collect(Collectors.joining("&"));
     }
 
-    HttpResponse<String>execute(ClassicHttpRequest request) throws MeiliException {
+    HttpResponse<String> execute(ClassicHttpRequest request) throws MeiliException {
         Supplier<String> keySupplier = config.getKey();
         if (keySupplier != null && keySupplier.get() != null) {
             request.addHeader("X-Meili-API-Key", keySupplier.get());

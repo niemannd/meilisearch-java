@@ -3,7 +3,7 @@ package io.github.niemannd.meilisearch.api.index;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.BasicHttpResponse;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;

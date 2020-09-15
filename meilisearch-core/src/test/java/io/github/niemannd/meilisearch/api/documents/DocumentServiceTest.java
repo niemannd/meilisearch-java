@@ -5,7 +5,7 @@ import io.github.niemannd.meilisearch.api.MeiliJSONException;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.BasicHttpResponse;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;

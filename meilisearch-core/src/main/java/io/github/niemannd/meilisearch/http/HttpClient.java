@@ -2,6 +2,7 @@ package io.github.niemannd.meilisearch.http;
 
 
 import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.http.response.HttpResponse;
 
 import java.util.Map;
 

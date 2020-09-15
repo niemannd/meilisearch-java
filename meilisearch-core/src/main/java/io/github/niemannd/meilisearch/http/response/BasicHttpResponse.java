@@ -1,4 +1,4 @@
-package io.github.niemannd.meilisearch.http;
+package io.github.niemannd.meilisearch.http.response;
 
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
