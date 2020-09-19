@@ -1,5 +1,6 @@
 package io.github.niemannd.meilisearch.http;
 
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.DocumentService;
@@ -17,7 +18,6 @@ import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.MinimalHttpClient;
 import org.apache.hc.core5.http.*;
-import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.BasicHttpEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 import org.apache.hc.core5.http.message.BasicClassicHttpResponse;
@@ -44,11 +44,15 @@ import static org.mockito.Mockito.*;
 class ApacheHttpClientTest {
     private final JacksonJsonProcessor processor = new JacksonJsonProcessor();
     private Supplier<String> keySupplier = () -> "masterKey";
-    private final Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(keySupplier).build();
+    private final Configuration config = new ConfigurationBuilder()
+            .setUrl("http://lavaridge:7700")
+            .setKey(keySupplier)
+            .addDocumentType("movies", Movie.class)
+            .build();
 
     private final MinimalHttpClient client = mock(MinimalHttpClient.class);
     private final ApacheHttpClient classToTest = new ApacheHttpClient(client, config, processor);
-    private final IndexService service = new IndexService(classToTest, processor);
+    private final IndexService service = new IndexService(new GenericServiceTemplate(classToTest, processor));
 
     private final ArrayDeque<ClassicHttpRequest> requests = new ArrayDeque<>();
     private final ArrayDeque<ClassicHttpResponse> responses = new ArrayDeque<>();
@@ -102,7 +106,7 @@ class ApacheHttpClientTest {
     @Test
     void getWithMeiliError() {
         responses.add(this.getResponse(404, "{\"message\":\"Document with id 1 not found\",\"errorCode\":\"document_not_found\",\"errorType\":\"invalid_request_error\",\"errorLink\":\"https://docs.meilisearch.com/errors#document_not_found\"}"));
-        DocumentService<Movie> movies = new DocumentService<>("movies", classToTest, config, processor);
+        DocumentService<Movie> movies = new DocumentService<>("movies", config, new GenericServiceTemplate(classToTest, processor));
         MeiliAPIException exception = assertThrows(MeiliAPIException.class, () -> movies.getDocument("1"));
         assertTrue(exception.hasError());
         assertEquals("document_not_found", exception.getError().getErrorCode());

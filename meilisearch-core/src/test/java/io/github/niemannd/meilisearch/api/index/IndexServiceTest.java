@@ -1,6 +1,7 @@
 package io.github.niemannd.meilisearch.api.index;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
 import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
@@ -25,7 +26,7 @@ class IndexServiceTest {
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     private final JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
     private final SettingsService settingsService = mock(SettingsService.class);
-    private final IndexService classToTest = new IndexService(client, processor, settingsService);
+    private final IndexService classToTest = new IndexService(new GenericServiceTemplate(client, processor), settingsService);
 
     @Test
     void create() {
@@ -93,6 +94,6 @@ class IndexServiceTest {
 
         assertThat(classToTest.getSettings("test"), is(equalTo(dummySettings)));
         assertThat(classToTest.resetSettings("test"), is(equalTo(dummyUpdate)));
-        assertThat(classToTest.updateSettings("test",dummySettings), is(equalTo(dummyUpdate)));
+        assertThat(classToTest.updateSettings("test", dummySettings), is(equalTo(dummyUpdate)));
     }
 }

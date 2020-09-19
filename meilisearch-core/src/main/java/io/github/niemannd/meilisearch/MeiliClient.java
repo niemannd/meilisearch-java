@@ -18,6 +18,7 @@ import java.util.Optional;
  */
 public class MeiliClient {
     private final Configuration config;
+    private final ServiceTemplate serviceTemplate;
 
     private final IndexService indexService;
     private final KeyService keyService;
@@ -35,15 +36,16 @@ public class MeiliClient {
      */
     public MeiliClient(Configuration config, HttpClient<?> client, JsonProcessor jsonProcessor, DocumentServiceFactory documentServiceFactory) {
         this.config = config;
-        this.indexService = new IndexService(client, jsonProcessor);
-        this.keyService = new KeyService(client, jsonProcessor);
-        this.instanceServices = new InstanceServices(client,jsonProcessor);
+        this.serviceTemplate = new GenericServiceTemplate(client,jsonProcessor);
+        this.indexService = new IndexService(serviceTemplate);
+        this.keyService = new KeyService(serviceTemplate);
+        this.instanceServices = new InstanceServices(serviceTemplate);
 
         Map<String, Class<?>> documentTypes = config.getDocumentTypes();
         for (String index : documentTypes.keySet()) {
             documentServices.put(
                     documentTypes.get(index),
-                    documentServiceFactory.createService(index, client, config, jsonProcessor)
+                    documentServiceFactory.createService(index, config, serviceTemplate)
             );
         }
     }

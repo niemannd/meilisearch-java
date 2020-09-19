@@ -1,6 +1,7 @@
 package io.github.niemannd.meilisearch.api.keys;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
 import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
@@ -20,7 +21,7 @@ import static org.mockito.Mockito.when;
 class KeyServiceTest {
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     private final JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
-    private final KeyService classToTest = new KeyService(client, processor);
+    private final KeyService classToTest = new KeyService(new GenericServiceTemplate(client, processor));
 
 
     @Test

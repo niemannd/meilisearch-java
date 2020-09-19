@@ -1,5 +1,6 @@
 package io.github.niemannd.meilisearch.api.instance;
 
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
@@ -20,7 +21,7 @@ class InstanceServicesTest {
 
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     JsonProcessor processor = new JacksonJsonProcessor();
-    InstanceServices classToTest = new InstanceServices(client, processor);
+    InstanceServices classToTest = new InstanceServices(new GenericServiceTemplate(client, processor));
 
     @Test
     void isHealthy() {

@@ -40,7 +40,7 @@ class MeiliClientTest {
     @Test
     void clientCreate() {
         DocumentServiceFactory mock = mock(DocumentServiceFactory.class);
-        when(mock.createService(any(), any(), any(), any()))
+        when(mock.createService(any(), any(), any()))
                 .thenThrow(MeiliException.class);
 
         assertThrows(MeiliException.class, () -> new MeiliClient(config, client, processor, mock));

@@ -2,6 +2,7 @@ package io.github.niemannd.meilisearch.api.index;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
 import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
@@ -20,7 +21,7 @@ class SettingsServiceTest {
 
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     private final JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
-    private final SettingsService classToTest = new SettingsService(client, processor);
+    private final SettingsService classToTest = new SettingsService(new GenericServiceTemplate(client, processor));
 
     @Test
     void getSettings() {

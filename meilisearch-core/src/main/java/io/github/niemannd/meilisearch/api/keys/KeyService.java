@@ -1,29 +1,27 @@
 package io.github.niemannd.meilisearch.api.keys;
 
+import io.github.niemannd.meilisearch.ServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliException;
-import io.github.niemannd.meilisearch.http.HttpClient;
-import io.github.niemannd.meilisearch.json.JsonProcessor;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class KeyService {
-    private final JsonProcessor jsonProcessor;
-    private final HttpClient<?> client;
+    private final ServiceTemplate serviceTemplate;
 
-    public KeyService(HttpClient<?> client, JsonProcessor jsonProcessor) {
-        this.jsonProcessor = jsonProcessor;
-        this.client = client;
+    public KeyService(ServiceTemplate serviceTemplate) {
+        this.serviceTemplate = serviceTemplate;
     }
 
     /**
-     *
      * @return the public and private keys in a map
      * @throws MeiliException in case some error happens
      */
     public Map<String, String> get() throws MeiliException {
-        String requestQuery = "/keys";
-        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()).getContent(), HashMap.class, String.class, String.class);
+        return serviceTemplate.execute(
+                new BasicHttpRequest("GET", "/keys"),
+                HashMap.class, String.class, String.class
+        );
     }
 }

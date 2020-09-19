@@ -1,10 +1,13 @@
 package io.github.niemannd.meilisearch.http.request;
 
+import io.github.niemannd.meilisearch.http.HttpMethod;
+
 import java.util.Map;
 
 public interface HttpRequest {
-    String getMethod();
+    HttpMethod getMethod();
     void setMethod(String method);
+    void setMethod(HttpMethod method);
     String getPath();
     void setPath(String path);
     Map<String,String> getHeaders();

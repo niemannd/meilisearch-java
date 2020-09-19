@@ -1,7 +1,8 @@
 package io.github.niemannd.meilisearch.api.documents;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.niemannd.meilisearch.api.MeiliJSONException;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
+import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
@@ -25,7 +26,7 @@ class DocumentServiceTest {
     private HttpClient<String> client = mock(ApacheHttpClient.class);
     private Configuration config = new ConfigurationBuilder().addDocumentType("movies", Movie.class).setUrl("https://localhost").build();
     private JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
-    private final DocumentService<Movie> classToTest = new DocumentService<>("movies", client, config, processor);
+    private final DocumentService<Movie> classToTest = new DocumentService<>("movies", config, new GenericServiceTemplate(client, processor));
 
     @Test
     void getDocument() {
@@ -81,9 +82,9 @@ class DocumentServiceTest {
         when(client.delete(any(String.class))).thenReturn(new BasicHttpResponse(null, 200, "{\"updateId\": 1}"));
         assertEquals(1, classToTest.deleteDocument("123").getUpdateId());
         when(client.delete(any(String.class))).thenReturn(new BasicHttpResponse(null, 200, null));
-        assertThrows(MeiliJSONException.class, () -> classToTest.deleteDocument("123"));
+        assertThrows(MeiliException.class, () -> classToTest.deleteDocument("123"));
         when(client.delete(any(String.class))).thenReturn(new BasicHttpResponse(null, 200, ""));
-        assertThrows(MeiliJSONException.class, () -> classToTest.deleteDocument("123"));
+        assertThrows(MeiliException.class, () -> classToTest.deleteDocument("123"));
     }
 
     @Test

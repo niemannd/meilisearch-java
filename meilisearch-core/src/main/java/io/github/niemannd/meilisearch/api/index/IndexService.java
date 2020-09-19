@@ -1,31 +1,29 @@
 package io.github.niemannd.meilisearch.api.index;
 
+import io.github.niemannd.meilisearch.ServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.Update;
-import io.github.niemannd.meilisearch.http.HttpClient;
-import io.github.niemannd.meilisearch.json.JsonProcessor;
+import io.github.niemannd.meilisearch.http.HttpMethod;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
+import io.github.niemannd.meilisearch.http.response.HttpResponse;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 public class IndexService {
 
-    private final HttpClient<?> client;
-    private final JsonProcessor jsonProcessor;
+    private final ServiceTemplate serviceTemplate;
     private final SettingsService settingsService;
 
-    public IndexService(HttpClient<?> client, JsonProcessor jsonProcessor, SettingsService settingsService) {
-        this.client = client;
-        this.jsonProcessor = jsonProcessor;
+    public IndexService(ServiceTemplate serviceTemplate, SettingsService settingsService) {
+        this.serviceTemplate = serviceTemplate;
         this.settingsService = settingsService;
     }
 
-    public IndexService(HttpClient<?> client, JsonProcessor jsonProcessor) throws MeiliException {
-        this(client, jsonProcessor, new SettingsService(client, jsonProcessor));
+    public IndexService(ServiceTemplate serviceTemplate) throws MeiliException {
+        this(serviceTemplate, new SettingsService(serviceTemplate));
     }
 
     /**
-     *
      * @param uid the uid of the index to be created
      * @return an {@link Index} Object
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
@@ -35,46 +33,49 @@ public class IndexService {
     }
 
     /**
-     *
-     * @param uid the indexname
+     * @param uid        the indexname
      * @param primaryKey the primaryKey for that index
      * @return the newly created index
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
      */
     public Index createIndex(String uid, String primaryKey) throws MeiliException {
-        HashMap<String, String> params = new HashMap<>();
-        params.put("uid", uid);
+        HashMap<String, String> body = new HashMap<>();
+        body.put("uid", uid);
         if (primaryKey != null)
-            params.put("primaryKey", primaryKey);
-        return jsonProcessor.deserialize(
-                client.post("/indexes", params).getContent(),
+            body.put("primaryKey", primaryKey);
+        return serviceTemplate.execute(
+                new BasicHttpRequest(HttpMethod.POST, "/indexes",serviceTemplate.getProcessor().serialize(body)),
                 Index.class
         );
     }
 
     /**
-     *
      * @param uid the indexname
      * @return the index
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
      */
     public Index getIndex(String uid) throws MeiliException {
         String requestQuery = "/indexes/" + uid;
-        return jsonProcessor.deserialize(client.get(requestQuery, Collections.emptyMap()).getContent(), Index.class);
+        return serviceTemplate.execute(
+                new BasicHttpRequest(HttpMethod.GET, requestQuery),
+                Index.class
+        );
     }
 
     /**
-     *
      * @return an array of all indexes
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
      */
     public Index[] getAllIndexes() throws MeiliException {
-        return jsonProcessor.deserialize(client.get("/indexes", Collections.emptyMap()).getContent(), Index[].class);
+        String requestQuery = "/indexes";
+        return serviceTemplate.execute(
+                new BasicHttpRequest(HttpMethod.GET, requestQuery),
+                Index[].class
+        );
     }
 
     /**
-     *
-     * @param uid the indexname
+     * @param uid        the indexname
      * @param primaryKey the primaryKey for that index
      * @return the updated index
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
@@ -83,25 +84,23 @@ public class IndexService {
         String requestQuery = "/indexes/" + uid;
         HashMap<String, String> body = new HashMap<>();
         body.put("primaryKey", primaryKey);
-        return jsonProcessor.deserialize(
-                client.put(requestQuery, Collections.emptyMap(), body).getContent(),
+        return serviceTemplate.execute(
+                new BasicHttpRequest(HttpMethod.PUT, requestQuery, serviceTemplate.getProcessor().serialize(body)),
                 Index.class
         );
     }
 
     /**
-     *
      * @param uid the indexname
      * @return true if the index was deleted, otherwise false
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
      */
     public boolean deleteIndex(String uid) throws MeiliException {
         String requestQuery = "/indexes/" + uid;
-        return client.delete(requestQuery).getStatusCode() == 204;
+        return ((HttpResponse<?>) serviceTemplate.execute(new BasicHttpRequest(HttpMethod.DELETE, requestQuery), null)).getStatusCode() == 204;
     }
 
     /**
-     *
      * @param index the indexname
      * @return the index settings
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
@@ -111,8 +110,7 @@ public class IndexService {
     }
 
     /**
-     *
-     * @param index the indexname
+     * @param index    the indexname
      * @param settings the new Settings
      * @return the updated settings
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
@@ -122,7 +120,6 @@ public class IndexService {
     }
 
     /**
-     *
      * @param index the indexname
      * @return the settings
      * @throws MeiliException in case something went wrong (http error, json exceptions, etc)
