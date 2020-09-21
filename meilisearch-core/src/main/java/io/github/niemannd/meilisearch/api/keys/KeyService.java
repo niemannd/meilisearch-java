@@ -2,6 +2,7 @@ package io.github.niemannd.meilisearch.api.keys;
 
 import io.github.niemannd.meilisearch.ServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.http.HttpMethod;
 import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
 
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class KeyService {
      */
     public Map<String, String> get() throws MeiliException {
         return serviceTemplate.execute(
-                new BasicHttpRequest("GET", "/keys"),
+                new BasicHttpRequest(HttpMethod.GET, "/keys"),
                 HashMap.class, String.class, String.class
         );
     }

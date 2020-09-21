@@ -11,6 +11,7 @@ import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,8 +51,26 @@ class InstanceServicesTest {
 
     @Test
     void maintenance() {
-        when(client.put(any(), any(), any())).thenReturn(new BasicHttpResponse(null, 200, "")).thenThrow(MeiliException.class);
+        final AtomicReference<String> body = new AtomicReference<>();
+        when(client.put(any(), any(), any(String.class)))
+                .thenAnswer(invocationOnMock -> {
+                    body.set(invocationOnMock.getArgument(2).toString());
+                    return new BasicHttpResponse(null, 200, "");
+                })
+                .thenAnswer(invocationOnMock -> {
+                    body.set(invocationOnMock.getArgument(2).toString());
+                    throw new MeiliException();
+                })
+                .thenAnswer(invocationOnMock -> {
+                    body.set(invocationOnMock.getArgument(2).toString());
+                    return new BasicHttpResponse(null, 200, "");
+                });
+
         assertTrue(classToTest.setMaintenance(true));
+        assertEquals("{\"health\": true }", body.get());
         assertFalse(classToTest.setMaintenance(true));
+        assertEquals("{\"health\": true }", body.get());
+        assertTrue(classToTest.setMaintenance(false));
+        assertEquals("{\"health\": false }", body.get());
     }
 }

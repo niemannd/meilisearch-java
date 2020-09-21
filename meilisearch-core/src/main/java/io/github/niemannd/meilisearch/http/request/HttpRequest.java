@@ -6,7 +6,6 @@ import java.util.Map;
 
 public interface HttpRequest {
     HttpMethod getMethod();
-    void setMethod(String method);
     void setMethod(HttpMethod method);
     String getPath();
     void setPath(String path);

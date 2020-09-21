@@ -2,6 +2,7 @@ package io.github.niemannd.meilisearch.api.instance;
 
 import io.github.niemannd.meilisearch.ServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliException;
+import io.github.niemannd.meilisearch.http.HttpMethod;
 import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
 
 import java.util.Collections;
@@ -22,7 +23,7 @@ public class InstanceServices {
     public boolean setMaintenance(boolean maintenance) {
         try {
             String content = "{\"health\": " + (maintenance ? "true" : "false") + " }";
-            serviceTemplate.execute(new BasicHttpRequest("PUT", "/health", content), String.class);
+            serviceTemplate.execute(new BasicHttpRequest(HttpMethod.PUT, "/health", content), String.class);
             return true;
         } catch (MeiliException e) {
             return false;
@@ -34,7 +35,7 @@ public class InstanceServices {
      */
     public boolean isHealthy() {
         try {
-            serviceTemplate.execute(new BasicHttpRequest("GET", "/health"), null);
+            serviceTemplate.execute(new BasicHttpRequest(HttpMethod.GET, "/health"), null);
             return true;
         } catch (MeiliException e) {
             return false;
@@ -47,7 +48,7 @@ public class InstanceServices {
     public Map<String, String> getVersion() {
         try {
             return serviceTemplate.execute(
-                    new BasicHttpRequest("GET", "/version"),
+                    new BasicHttpRequest(HttpMethod.GET, "/version"),
                     HashMap.class,
                     String.class,
                     String.class

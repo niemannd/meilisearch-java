@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 class HttpResponseTest {
 
-    private BasicHttpResponse classToTest;
+    private final BasicHttpResponse classToTest;
 
     public HttpResponseTest() {
         Map<String, String> headers = new HashMap<>();

@@ -28,18 +28,6 @@ public class BasicHttpRequest implements HttpRequest, HttpEntity<String> {
         this.headers = headers;
     }
 
-    public BasicHttpRequest(String method, String path) {
-        this(method, path, null, Collections.emptyMap());
-    }
-
-    public BasicHttpRequest(String method, String path, String content) {
-        this(method, path, content, Collections.emptyMap());
-    }
-
-    public BasicHttpRequest(String method, String path, String content, Map<String, String> headers) {
-        this(HttpMethod.valueOf(method), path, content, headers);
-    }
-
     @Override
     public String getContent() {
         return content;
@@ -48,11 +36,6 @@ public class BasicHttpRequest implements HttpRequest, HttpEntity<String> {
     @Override
     public HttpMethod getMethod() {
         return method;
-    }
-
-    @Override
-    public void setMethod(String method) {
-        this.method = HttpMethod.valueOf(method);
     }
 
     @Override
