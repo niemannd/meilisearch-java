@@ -41,6 +41,7 @@ public class GenericServiceTemplate implements ServiceTemplate {
                     .thenApply(httpResponse -> processor.deserialize(httpResponse.getContent(), targetClass, parameter))
                     .get();
         } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
             throw new MeiliException(e);
         }
     }

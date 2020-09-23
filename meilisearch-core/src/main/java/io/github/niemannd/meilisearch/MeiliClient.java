@@ -18,7 +18,6 @@ import java.util.Optional;
  */
 public class MeiliClient {
     private final Configuration config;
-    private final ServiceTemplate serviceTemplate;
 
     private final IndexService indexService;
     private final KeyService keyService;
@@ -29,33 +28,44 @@ public class MeiliClient {
     /**
      * Creates a MeilisearchClient for the given {@code config}, {@code client},{@code jsonProcessor} and {@code documentServiceFactory}.
      *
-     * @param config Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
-     * @param client an HTTPClient, e.g. {@link io.github.niemannd.meilisearch.http.ApacheHttpClient}
-     * @param jsonProcessor an JsonProcessor , e.g. {@link io.github.niemannd.meilisearch.json.JacksonJsonProcessor}
+     * @param config                 Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
+     * @param serviceTemplate        ServiceTempalte that defines how {@link HttpClient} and {@link JsonProcessor} work together
      * @param documentServiceFactory DocumentServiceFactory for ServiceCreation
      */
-    public MeiliClient(Configuration config, HttpClient<?> client, JsonProcessor jsonProcessor, DocumentServiceFactory documentServiceFactory) {
+    public MeiliClient(Configuration config, ServiceTemplate serviceTemplate, DocumentServiceFactory documentServiceFactory) {
         this.config = config;
-        this.serviceTemplate = new GenericServiceTemplate(client,jsonProcessor);
         this.indexService = new IndexService(serviceTemplate);
         this.keyService = new KeyService(serviceTemplate);
         this.instanceServices = new InstanceServices(serviceTemplate);
 
         Map<String, Class<?>> documentTypes = config.getDocumentTypes();
-        for (String index : documentTypes.keySet()) {
+        for (Map.Entry<String, Class<?>> index : documentTypes.entrySet()) {
             documentServices.put(
-                    documentTypes.get(index),
-                    documentServiceFactory.createService(index, config, serviceTemplate)
+                    documentTypes.get(index.getKey()),
+                    documentServiceFactory.createService(index.getKey(), config, serviceTemplate)
             );
         }
+    }
+
+    /**
+     * Creates a MeilisearchClient for the given {@code config}, {@code client},{@code jsonProcessor} and {@code documentServiceFactory}.
+     * This Constructor will use a {@link GenericServiceTemplate} internally
+     *
+     * @param config                 Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
+     * @param client                 an HTTPClient, e.g. {@link io.github.niemannd.meilisearch.http.ApacheHttpClient}
+     * @param jsonProcessor          an JsonProcessor , e.g. {@link io.github.niemannd.meilisearch.json.JacksonJsonProcessor}
+     * @param documentServiceFactory DocumentServiceFactory for ServiceCreation
+     */
+    public MeiliClient(Configuration config, HttpClient<?> client, JsonProcessor jsonProcessor, DocumentServiceFactory documentServiceFactory) {
+        this(config, new GenericServiceTemplate(client, jsonProcessor), documentServiceFactory);
     }
 
     /**
      * Creates a MeilisearchClient for the given {@code config}, {@code client},{@code jsonProcessor}.
      * Uses the default {@link DocumentServiceFactory} for ServiceCreation
      *
-     * @param config Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
-     * @param client an HTTPClient, e.g. {@link io.github.niemannd.meilisearch.http.ApacheHttpClient}
+     * @param config        Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
+     * @param client        an HTTPClient, e.g. {@link io.github.niemannd.meilisearch.http.ApacheHttpClient}
      * @param jsonProcessor an JsonProcessor , e.g. {@link io.github.niemannd.meilisearch.json.JacksonJsonProcessor}
      */
     public MeiliClient(Configuration config, HttpClient<?> client, JsonProcessor jsonProcessor) {
@@ -63,7 +73,6 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @return the IndexService
      */
     public IndexService indexes() {
@@ -71,7 +80,6 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @param documentType a Class that's associated with an Index
      * @return the DocumentService for the Index or 'null' if no Service could be found
      */
@@ -81,7 +89,6 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @param index name of an index
      * @return the DocumentService for the Index
      * @throws MeiliException in case no documentType could be found for the supplied index name
@@ -96,7 +103,6 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @return the KeyService
      */
     public KeyService keys() {
@@ -104,7 +110,6 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @return the Config for this Client
      */
     public Configuration getConfig() {
@@ -112,14 +117,13 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @return true if the health endpoint returns http status code 200, otherwise false
      */
     public boolean isHealthy() {
         return instanceServices.isHealthy();
     }
+
     /**
-     *
      * @return true if the health status could be set, otherwise false
      */
     public boolean setMaintenance(boolean maintenance) {
@@ -127,10 +131,9 @@ public class MeiliClient {
     }
 
     /**
-     *
      * @return Version Information of the Meilisearch instance
      */
-    public Map<String,String> getVersion() {
+    public Map<String, String> getVersion() {
         return instanceServices.getVersion();
     }
 }

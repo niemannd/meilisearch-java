@@ -1,7 +1,7 @@
 package io.github.niemannd.meilisearch.api;
 
 public class MeiliAPIException extends MeiliException {
-    private MeiliError error;
+    private final MeiliError error;
 
     public MeiliAPIException(String message, MeiliError error) {
         super(message);
@@ -10,10 +10,12 @@ public class MeiliAPIException extends MeiliException {
 
     public MeiliAPIException(Throwable cause) {
         super(cause);
+        this.error = null;
     }
 
     public MeiliAPIException(String message) {
         super(message);
+        this.error = null;
     }
 
     public MeiliError getError() {
