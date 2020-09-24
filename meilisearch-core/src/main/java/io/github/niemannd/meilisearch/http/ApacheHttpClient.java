@@ -63,6 +63,7 @@ public class ApacheHttpClient implements HttpClient<String> {
                     MeiliError error = processor.deserialize(response.getContent(), MeiliError.class);
                     throw new MeiliAPIException(error.getMessage(), error);
                 } else {
+                    // todo: add more details to this exception.
                     throw new MeiliAPIException("empty response without success code");
                 }
             }

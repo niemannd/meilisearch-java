@@ -10,25 +10,43 @@ import io.github.niemannd.meilisearch.json.JsonProcessor;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * {@inheritDoc}
+ * <p>
+ * The GenericServiceTemplate first executes the supplied {@link HttpRequest} and then deserializes the response
+ */
 public class GenericServiceTemplate implements ServiceTemplate {
     private final HttpClient<?> client;
     private final JsonProcessor processor;
 
+    /**
+     * @param client    a {@link HttpClient}
+     * @param processor a {@link JsonProcessor}
+     */
     public GenericServiceTemplate(HttpClient<?> client, JsonProcessor processor) {
         this.client = client;
         this.processor = processor;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public HttpClient<?> getClient() {
         return client;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public JsonProcessor getProcessor() {
         return processor;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <T> T execute(HttpRequest request, Class<?> targetClass, Class<?>... parameter) throws MeiliException {
@@ -46,6 +64,12 @@ public class GenericServiceTemplate implements ServiceTemplate {
         }
     }
 
+    /**
+     * Executes the given {@link HttpRequest}
+     * @param request the {@link HttpRequest}
+     * @return the HttpResponse
+     * @throws MeiliException in case there are Problems with the Request, including error codes
+     */
     private HttpResponse<?> makeRequest(HttpRequest request) throws MeiliException {
         switch (request.getMethod()) {
             case GET:
