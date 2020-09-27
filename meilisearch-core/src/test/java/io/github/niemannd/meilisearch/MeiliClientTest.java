@@ -7,8 +7,9 @@ import io.github.niemannd.meilisearch.api.index.IndexService;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import io.github.niemannd.meilisearch.utils.Movie;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.*;
 class MeiliClientTest {
 
     private final Configuration config = new ConfigurationBuilder()
-            .setKey(() -> "masterKey")
+            .setKeySupplier(() -> "masterKey")
             .setUrl("http://127.0.0.1:7700")
             .addDocumentType("movies", Movie.class)
             .build();
@@ -34,16 +35,24 @@ class MeiliClientTest {
 
     @BeforeEach
     void setUp() {
-        assertDoesNotThrow(() -> classToTest = new MeiliClient(config, client, processor, new DocumentServiceFactory()));
+        GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+        assertDoesNotThrow(() -> classToTest = new MeiliClient(config, serviceTemplate, new DocumentServiceFactory(), new BasicHttpRequestFactory(serviceTemplate)));
     }
 
     @Test
     void clientCreate() {
         DocumentServiceFactory mock = mock(DocumentServiceFactory.class);
-        when(mock.createService(any(), any(), any()))
+        when(mock.createService(any(), any(), any(), any()))
                 .thenThrow(MeiliException.class);
 
-        assertThrows(MeiliException.class, () -> new MeiliClient(config, client, processor, mock));
+        ServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+        BasicHttpRequestFactory requestFactory = new BasicHttpRequestFactory(serviceTemplate);
+
+        assertThrows(MeiliException.class, () -> new MeiliClient(config, serviceTemplate, mock, requestFactory));
+        //noinspection deprecation
+        assertDoesNotThrow(() -> new MeiliClient(config, client, processor, new DocumentServiceFactory()));
+        //noinspection deprecation
+        assertDoesNotThrow(() -> new MeiliClient(config, client, processor));
     }
 
     @Test
@@ -81,10 +90,10 @@ class MeiliClientTest {
     @Test
     void version() {
         when(client.get(any(), any()))
-                .thenReturn(new BasicHttpResponse(null,200,"{\"commitSha\":\"b46889b5f0f2f8b91438a08a358ba8f05fc09fc1\",\"buildDate\":\"2019-11-15T09:51:54.278247+00:00\",\"pkgVersion\":\"0.1.1\"}"))
+                .thenReturn(new BasicHttpResponse(null, 200, "{\"commitSha\":\"b46889b5f0f2f8b91438a08a358ba8f05fc09fc1\",\"buildDate\":\"2019-11-15T09:51:54.278247+00:00\",\"pkgVersion\":\"0.1.1\"}"))
                 .thenThrow(MeiliException.class);
         when(client.get(any(), any()))
-                .thenReturn(new BasicHttpResponse(null,200,"{\"commitSha\":\"b46889b5f0f2f8b91438a08a358ba8f05fc09fc1\",\"buildDate\":\"2019-11-15T09:51:54.278247+00:00\",\"pkgVersion\":\"0.1.1\"}"))
+                .thenReturn(new BasicHttpResponse(null, 200, "{\"commitSha\":\"b46889b5f0f2f8b91438a08a358ba8f05fc09fc1\",\"buildDate\":\"2019-11-15T09:51:54.278247+00:00\",\"pkgVersion\":\"0.1.1\"}"))
                 .thenThrow(MeiliException.class);
 
         Map<String, String> version = classToTest.getVersion();
@@ -102,7 +111,7 @@ class MeiliClientTest {
 
     @Test
     void maintenance() {
-        when(client.put(any(), any(),any())).thenReturn(new BasicHttpResponse(null, 200, "")).thenThrow(MeiliException.class);
+        when(client.put(any(), any(), any())).thenReturn(new BasicHttpResponse(null, 200, "")).thenThrow(MeiliException.class);
         assertTrue(classToTest.setMaintenance(true));
         assertFalse(classToTest.setMaintenance(true));
     }

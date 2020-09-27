@@ -5,6 +5,7 @@ import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.HttpMethod;
 import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
+import io.github.niemannd.meilisearch.http.request.HttpRequestFactory;
 import io.github.niemannd.meilisearch.http.response.HttpResponse;
 
 import java.util.HashMap;
@@ -12,15 +13,17 @@ import java.util.HashMap;
 public class IndexService {
 
     private final ServiceTemplate serviceTemplate;
+    private final HttpRequestFactory requestFactory;
     private final SettingsService settingsService;
 
-    public IndexService(ServiceTemplate serviceTemplate, SettingsService settingsService) {
+    public IndexService(ServiceTemplate serviceTemplate, HttpRequestFactory requestFactory, SettingsService settingsService) {
         this.serviceTemplate = serviceTemplate;
+        this.requestFactory = requestFactory;
         this.settingsService = settingsService;
     }
 
-    public IndexService(ServiceTemplate serviceTemplate) throws MeiliException {
-        this(serviceTemplate, new SettingsService(serviceTemplate));
+    public IndexService(ServiceTemplate serviceTemplate, HttpRequestFactory requestFactory) throws MeiliException {
+        this(serviceTemplate, requestFactory, new SettingsService(serviceTemplate, requestFactory));
     }
 
     /**

@@ -7,6 +7,8 @@ import io.github.niemannd.meilisearch.api.instance.InstanceServices;
 import io.github.niemannd.meilisearch.api.keys.KeyService;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.request.HttpRequestFactory;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 
 import java.util.HashMap;
@@ -26,23 +28,24 @@ public class MeiliClient {
     private final HashMap<Class<?>, DocumentService<?>> documentServices = new HashMap<>();
 
     /**
-     * Creates a MeilisearchClient for the given {@code config}, {@code client},{@code jsonProcessor} and {@code documentServiceFactory}.
+     * Creates a MeilisearchClient for the given {@code config}, {@code serviceTemplate} and {@code documentServiceFactory}.
      *
      * @param config                 Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
      * @param serviceTemplate        ServiceTempalte that defines how {@link HttpClient} and {@link JsonProcessor} work together
      * @param documentServiceFactory DocumentServiceFactory for ServiceCreation
      */
-    public MeiliClient(Configuration config, ServiceTemplate serviceTemplate, DocumentServiceFactory documentServiceFactory) {
+    public MeiliClient(Configuration config, ServiceTemplate serviceTemplate, DocumentServiceFactory documentServiceFactory, HttpRequestFactory requestFactory) {
         this.config = config;
-        this.indexService = new IndexService(serviceTemplate);
-        this.keyService = new KeyService(serviceTemplate);
-        this.instanceServices = new InstanceServices(serviceTemplate);
+        HttpRequestFactory factory = requestFactory == null ? new BasicHttpRequestFactory(serviceTemplate) : requestFactory;
+        this.indexService = new IndexService(serviceTemplate, factory);
+        this.keyService = new KeyService(serviceTemplate, factory);
+        this.instanceServices = new InstanceServices(serviceTemplate, factory);
 
         Map<String, Class<?>> documentTypes = config.getDocumentTypes();
         for (Map.Entry<String, Class<?>> index : documentTypes.entrySet()) {
             documentServices.put(
                     documentTypes.get(index.getKey()),
-                    documentServiceFactory.createService(index.getKey(), config, serviceTemplate)
+                    documentServiceFactory.createService(index.getKey(), config, serviceTemplate,factory)
             );
         }
     }
@@ -51,25 +54,31 @@ public class MeiliClient {
      * Creates a MeilisearchClient for the given {@code config}, {@code client},{@code jsonProcessor} and {@code documentServiceFactory}.
      * This Constructor will use a {@link GenericServiceTemplate} internally
      *
+     * @deprecated
+     *
      * @param config                 Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
      * @param client                 an HTTPClient, e.g. {@link io.github.niemannd.meilisearch.http.ApacheHttpClient}
      * @param jsonProcessor          an JsonProcessor , e.g. {@link io.github.niemannd.meilisearch.json.JacksonJsonProcessor}
      * @param documentServiceFactory DocumentServiceFactory for ServiceCreation
      */
+    @Deprecated
     public MeiliClient(Configuration config, HttpClient<?> client, JsonProcessor jsonProcessor, DocumentServiceFactory documentServiceFactory) {
-        this(config, new GenericServiceTemplate(client, jsonProcessor), documentServiceFactory);
+        this(config, new GenericServiceTemplate(client, jsonProcessor), documentServiceFactory, null);
     }
 
     /**
      * Creates a MeilisearchClient for the given {@code config}, {@code client},{@code jsonProcessor}.
      * Uses the default {@link DocumentServiceFactory} for ServiceCreation
      *
+     * @deprecated
+     *
      * @param config        Configuration created by using a {@link io.github.niemannd.meilisearch.config.ConfigurationBuilder}
      * @param client        an HTTPClient, e.g. {@link io.github.niemannd.meilisearch.http.ApacheHttpClient}
      * @param jsonProcessor an JsonProcessor , e.g. {@link io.github.niemannd.meilisearch.json.JacksonJsonProcessor}
      */
+    @Deprecated
     public MeiliClient(Configuration config, HttpClient<?> client, JsonProcessor jsonProcessor) {
-        this(config, client, jsonProcessor, new DocumentServiceFactory());
+        this(config, new GenericServiceTemplate(client, jsonProcessor), new DocumentServiceFactory(), null);
     }
 
     /**
@@ -135,5 +144,70 @@ public class MeiliClient {
      */
     public Map<String, String> getVersion() {
         return instanceServices.getVersion();
+    }
+
+
+    public static MeiliClientBuilder builder() {
+        return new MeiliClientBuilder();
+    }
+
+    public static class MeiliClientBuilder {
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MeiliClientBuilder.class);
+
+        Configuration config;
+        HttpClient<?> httpClient;
+        JsonProcessor jsonProcessor;
+        ServiceTemplate serviceTemplate;
+        HttpRequestFactory requestFactory;
+        DocumentServiceFactory documentServiceFactory;
+
+        public MeiliClientBuilder withConfig(Configuration config) {
+            this.config = config;
+            return this;
+        }
+
+        public MeiliClientBuilder withHttpClient(HttpClient<?> httpClient) {
+            this.httpClient = httpClient;
+            return this;
+        }
+
+        public MeiliClientBuilder withJsonProcessor(JsonProcessor jsonProcessor) {
+            this.jsonProcessor = jsonProcessor;
+            return this;
+        }
+
+        public MeiliClientBuilder withServiceTemplate(ServiceTemplate serviceTemplate) {
+            this.serviceTemplate = serviceTemplate;
+            return this;
+        }
+
+        public MeiliClientBuilder withRequestFactory(HttpRequestFactory requestFactory) {
+            this.requestFactory = requestFactory;
+            return this;
+        }
+
+        public MeiliClientBuilder withDocumentServiceFactory(DocumentServiceFactory documentServiceFactory) {
+            this.documentServiceFactory = documentServiceFactory;
+            return this;
+        }
+
+        public MeiliClient build() {
+            if(httpClient != null && serviceTemplate != null) {
+                log.warn("Both httpClient and serviceTemplate are set - httpClient will be ignored");
+            }
+            if(jsonProcessor != null && serviceTemplate != null) {
+                log.warn("Both jsonProcessor and serviceTemplate are set - jsonProcessor will be ignored");
+            }
+            if (serviceTemplate == null) {
+                serviceTemplate = new GenericServiceTemplate(httpClient, jsonProcessor);
+            }
+            if (documentServiceFactory == null) {
+                documentServiceFactory = new DocumentServiceFactory();
+            }
+            if (requestFactory == null) {
+                requestFactory = new BasicHttpRequestFactory(serviceTemplate);
+            }
+            return new MeiliClient(config, serviceTemplate, documentServiceFactory, requestFactory);
+        }
     }
 }

@@ -7,12 +7,12 @@ import java.util.function.Supplier;
 
 public class Configuration {
     private final String url;
-    private final Supplier<String> key;
+    private final Supplier<String> keySupplier;
     private final Map<String, Class<?>> documentTypes;
 
-    public Configuration(String url, Supplier<String> key, Map<String, Class<?>> documentTypes) {
+    public Configuration(String url, Supplier<String> keySupplier, Map<String, Class<?>> documentTypes) {
         this.url = url;
-        this.key = key;
+        this.keySupplier = keySupplier;
         this.documentTypes = documentTypes;
     }
 
@@ -20,8 +20,8 @@ public class Configuration {
         return url;
     }
 
-    public Supplier<String> getKey() {
-        return key;
+    public Supplier<String> getKeySupplier() {
+        return keySupplier;
     }
 
     /**

@@ -5,18 +5,21 @@ import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.http.HttpMethod;
 import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
+import io.github.niemannd.meilisearch.http.request.HttpRequestFactory;
 
 import java.util.List;
 
 public class DocumentService<T> {
 
-    private final Configuration config;
     private final ServiceTemplate serviceTemplate;
+    private final HttpRequestFactory requestFactory;
     private final String indexName;
+    private final Class<?> indexModel;
 
-    public DocumentService(String indexName, Configuration config, ServiceTemplate serviceTemplate) throws MeiliException {
+    public DocumentService(String indexName, Configuration config, ServiceTemplate serviceTemplate, HttpRequestFactory requestFactory) throws MeiliException {
         this.indexName = indexName;
-        this.config = config;
+        this.requestFactory = requestFactory;
+        this.indexModel = config.mustGetDocumentType(indexName);
         this.serviceTemplate = serviceTemplate;
     }
 
@@ -29,7 +32,7 @@ public class DocumentService<T> {
         String requestQuery = "/indexes/" + indexName + "/documents/" + identifier;
         return serviceTemplate.execute(
                 new BasicHttpRequest(HttpMethod.GET, requestQuery),
-                config.mustGetDocumentType(indexName)
+                indexModel
         );
     }
 
@@ -51,7 +54,7 @@ public class DocumentService<T> {
         return serviceTemplate.execute(
                 new BasicHttpRequest(HttpMethod.GET, requestQuery),
                 List.class,
-                config.mustGetDocumentType(indexName)
+                indexModel
         );
     }
 
@@ -146,7 +149,7 @@ public class DocumentService<T> {
         return serviceTemplate.execute(
                 new BasicHttpRequest(HttpMethod.POST, requestQuery, serviceTemplate.getProcessor().serialize(sr)),
                 SearchResponse.class,
-                config.mustGetDocumentType(indexName)
+                indexModel
         );
     }
 
@@ -160,7 +163,7 @@ public class DocumentService<T> {
         return serviceTemplate.execute(
                 new BasicHttpRequest(HttpMethod.POST, requestQuery, serviceTemplate.getProcessor().serialize(sr)),
                 SearchResponse.class,
-                config.mustGetDocumentType(indexName)
+                indexModel
         );
     }
 

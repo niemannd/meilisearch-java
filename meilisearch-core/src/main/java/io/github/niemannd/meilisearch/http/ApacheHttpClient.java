@@ -48,7 +48,7 @@ public class ApacheHttpClient implements HttpClient<String> {
     }
 
     HttpResponse<String> execute(ClassicHttpRequest request) throws MeiliException {
-        Supplier<String> keySupplier = config.getKey();
+        Supplier<String> keySupplier = config.getKeySupplier();
         if (keySupplier != null && keySupplier.get() != null) {
             request.addHeader("X-Meili-API-Key", keySupplier.get());
         }

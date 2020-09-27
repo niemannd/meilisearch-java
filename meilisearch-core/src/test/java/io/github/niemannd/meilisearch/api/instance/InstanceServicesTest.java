@@ -4,8 +4,9 @@ import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,8 @@ class InstanceServicesTest {
 
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     JsonProcessor processor = new JacksonJsonProcessor();
-    InstanceServices classToTest = new InstanceServices(new GenericServiceTemplate(client, processor));
+    private final GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+    InstanceServices classToTest = new InstanceServices(serviceTemplate, new BasicHttpRequestFactory(serviceTemplate));
 
     @Test
     void isHealthy() {

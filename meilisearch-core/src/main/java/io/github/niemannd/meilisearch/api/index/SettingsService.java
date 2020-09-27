@@ -5,13 +5,16 @@ import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.HttpMethod;
 import io.github.niemannd.meilisearch.http.request.BasicHttpRequest;
+import io.github.niemannd.meilisearch.http.request.HttpRequestFactory;
 
 public class SettingsService {
 
     private final ServiceTemplate serviceTemplate;
+    private final HttpRequestFactory requestFactory;
 
-    public SettingsService(ServiceTemplate serviceTemplate) {
+    public SettingsService(ServiceTemplate serviceTemplate, HttpRequestFactory requestFactory) {
         this.serviceTemplate = serviceTemplate;
+        this.requestFactory = requestFactory;
     }
 
     /**

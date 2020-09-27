@@ -6,8 +6,9 @@ import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import io.github.niemannd.meilisearch.utils.Movie;
@@ -26,7 +27,8 @@ class DocumentServiceTest {
     private HttpClient<String> client = mock(ApacheHttpClient.class);
     private Configuration config = new ConfigurationBuilder().addDocumentType("movies", Movie.class).setUrl("https://localhost").build();
     private JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
-    private final DocumentService<Movie> classToTest = new DocumentService<>("movies", config, new GenericServiceTemplate(client, processor));
+    private final GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+    private final DocumentService<Movie> classToTest = new DocumentService<>("movies", config, serviceTemplate, new BasicHttpRequestFactory(serviceTemplate));
 
     @Test
     void getDocument() {
