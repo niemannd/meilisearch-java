@@ -1,10 +1,12 @@
 package io.github.niemannd.meilisearch.api.index;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,8 @@ import java.util.Deque;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -25,7 +28,8 @@ class IndexServiceTest {
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     private final JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
     private final SettingsService settingsService = mock(SettingsService.class);
-    private final IndexService classToTest = new IndexService(client, processor, settingsService);
+    private final GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+    private final IndexService classToTest = new IndexService(serviceTemplate, new BasicHttpRequestFactory(serviceTemplate), settingsService);
 
     @Test
     void create() {
@@ -93,6 +97,6 @@ class IndexServiceTest {
 
         assertThat(classToTest.getSettings("test"), is(equalTo(dummySettings)));
         assertThat(classToTest.resetSettings("test"), is(equalTo(dummyUpdate)));
-        assertThat(classToTest.updateSettings("test",dummySettings), is(equalTo(dummyUpdate)));
+        assertThat(classToTest.updateSettings("test", dummySettings), is(equalTo(dummyUpdate)));
     }
 }

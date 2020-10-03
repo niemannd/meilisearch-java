@@ -1,5 +1,6 @@
 package io.github.niemannd.meilisearch.http;
 
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.api.documents.DocumentService;
@@ -7,6 +8,8 @@ import io.github.niemannd.meilisearch.api.index.Index;
 import io.github.niemannd.meilisearch.api.index.IndexService;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.HttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.utils.Movie;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
@@ -37,16 +40,22 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 class ApacheHttpClientTest {
     private final JacksonJsonProcessor processor = new JacksonJsonProcessor();
     private Supplier<String> keySupplier = () -> "masterKey";
-    private final Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(keySupplier).build();
+    private final Configuration config = new ConfigurationBuilder()
+            .setUrl("http://lavaridge:7700")
+            .setKeySupplier(keySupplier)
+            .addDocumentType("movies", Movie.class)
+            .build();
 
     private final MinimalHttpClient client = mock(MinimalHttpClient.class);
     private final ApacheHttpClient classToTest = new ApacheHttpClient(client, config, processor);
-    private final IndexService service = new IndexService(classToTest, processor);
+    private final GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(classToTest, processor);
+    private final IndexService service = new IndexService(serviceTemplate, new BasicHttpRequestFactory(serviceTemplate));
 
     private final ArrayDeque<ClassicHttpRequest> requests = new ArrayDeque<>();
     private final ArrayDeque<ClassicHttpResponse> responses = new ArrayDeque<>();
@@ -79,7 +88,7 @@ class ApacheHttpClientTest {
 
     @Test
     void constructor() {
-        ApacheHttpClient apacheHttpClient = new ApacheHttpClient(config, processor);
+        assertDoesNotThrow(() -> new ApacheHttpClient(config, processor));
     }
 
     @Test
@@ -100,7 +109,8 @@ class ApacheHttpClientTest {
     @Test
     void getWithMeiliError() {
         responses.add(this.getResponse(404, "{\"message\":\"Document with id 1 not found\",\"errorCode\":\"document_not_found\",\"errorType\":\"invalid_request_error\",\"errorLink\":\"https://docs.meilisearch.com/errors#document_not_found\"}"));
-        DocumentService<Movie> movies = new DocumentService<>("movies", classToTest, config, processor);
+        GenericServiceTemplate localServiceTemplate = new GenericServiceTemplate(classToTest, processor);
+        DocumentService<Movie> movies = new DocumentService<>("movies", config, localServiceTemplate, new BasicHttpRequestFactory(localServiceTemplate));
         MeiliAPIException exception = assertThrows(MeiliAPIException.class, () -> movies.getDocument("1"));
         assertTrue(exception.hasError());
         assertEquals("document_not_found", exception.getError().getErrorCode());
@@ -252,7 +262,7 @@ class ApacheHttpClientTest {
         });
         responses.add(this.getResponse(200, "{}"));
         BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
-        HttpResponse<String>execute = classToTest.execute(dummyRequest);
+        HttpResponse<String> execute = classToTest.execute(dummyRequest);
         assertThat(execute, notNullValue());
         assertThat(execute.getStatusCode(), is(200));
         assertThat(execute.getContent(), is("{}"));
@@ -265,7 +275,7 @@ class ApacheHttpClientTest {
     @Test
     void keySupplierNull() {
         BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
-        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(null).build();
+        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKeySupplier(null).build();
         ApacheHttpClient classForTest = new ApacheHttpClient(client, config, processor);
 
         responses.add(this.getResponse(200, "{}"));
@@ -278,7 +288,7 @@ class ApacheHttpClientTest {
     @Test
     void keySupplierGetNull() {
         BasicClassicHttpRequest dummyRequest = new BasicClassicHttpRequest("GET", "/");
-        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKey(() -> null).build();
+        Configuration config = new ConfigurationBuilder().setUrl("http://lavaridge:7700").setKeySupplier(() -> null).build();
         ApacheHttpClient classForTest = new ApacheHttpClient(client, config, processor);
 
         responses.add(this.getResponse(200, "{}"));

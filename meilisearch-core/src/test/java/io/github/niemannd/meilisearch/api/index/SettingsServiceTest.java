@@ -2,10 +2,12 @@ package io.github.niemannd.meilisearch.api.index;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,8 @@ class SettingsServiceTest {
 
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     private final JsonProcessor processor = new JacksonJsonProcessor(new ObjectMapper());
-    private final SettingsService classToTest = new SettingsService(client, processor);
+    private final GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+    private final SettingsService classToTest = new SettingsService(serviceTemplate, new BasicHttpRequestFactory(serviceTemplate));
 
     @Test
     void getSettings() {

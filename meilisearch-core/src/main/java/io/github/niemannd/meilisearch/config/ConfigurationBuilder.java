@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 public class ConfigurationBuilder {
     private String url = "http://127.0.0.1:7700";
-    private Supplier<String> key = () -> null;
+    private Supplier<String> keySupplier = () -> null;
     private final Map<String, Class<?>> documentTypes = new HashMap<>();
 
     public ConfigurationBuilder setUrl(String url) {
@@ -14,8 +14,8 @@ public class ConfigurationBuilder {
         return this;
     }
 
-    public ConfigurationBuilder setKey(Supplier<String> key) {
-        this.key = key;
+    public ConfigurationBuilder setKeySupplier(Supplier<String> keySupplier) {
+        this.keySupplier = keySupplier;
         return this;
     }
 
@@ -30,6 +30,6 @@ public class ConfigurationBuilder {
     }
 
     public Configuration build() {
-        return new Configuration(this.url, this.key, this.documentTypes);
+        return new Configuration(this.url, this.keySupplier, this.documentTypes);
     }
 }

@@ -1,11 +1,14 @@
 package integrationtests;
 
+import io.github.niemannd.meilisearch.DocumentServiceFactory;
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.MeiliClient;
 import io.github.niemannd.meilisearch.api.documents.DocumentService;
 import io.github.niemannd.meilisearch.api.documents.Update;
 import io.github.niemannd.meilisearch.config.Configuration;
 import io.github.niemannd.meilisearch.config.ConfigurationBuilder;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.utils.Movie;
 
@@ -31,11 +34,12 @@ public abstract class AbstractIT {
         key = new KeySupplier(meiliKey);
         Configuration config = new ConfigurationBuilder()
                 .setUrl(meiliUrl)
-                .setKey(key)
+                .setKeySupplier(key)
                 .addDocumentType(testIndexName, Movie.class)
                 .build();
 
-        client = new MeiliClient(config, new ApacheHttpClient(config, processor), processor);
+        GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(new ApacheHttpClient(config, processor), processor);
+        client = new MeiliClient(config, serviceTemplate, new DocumentServiceFactory(), new BasicHttpRequestFactory(serviceTemplate));
     }
 
     private void setTestData() throws IOException {

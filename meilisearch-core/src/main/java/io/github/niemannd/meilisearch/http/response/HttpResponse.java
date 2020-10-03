@@ -1,4 +1,4 @@
-package io.github.niemannd.meilisearch.http;
+package io.github.niemannd.meilisearch.http.response;
 
 import java.util.Map;
 

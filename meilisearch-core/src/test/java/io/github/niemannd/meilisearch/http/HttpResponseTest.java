@@ -1,6 +1,7 @@
 package io.github.niemannd.meilisearch.http;
 
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 class HttpResponseTest {
 
-    private BasicHttpResponse classToTest;
+    private final BasicHttpResponse classToTest;
 
     public HttpResponseTest() {
         Map<String, String> headers = new HashMap<>();

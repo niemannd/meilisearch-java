@@ -1,15 +1,18 @@
 package io.github.niemannd.meilisearch.api.instance;
 
+import io.github.niemannd.meilisearch.GenericServiceTemplate;
 import io.github.niemannd.meilisearch.api.MeiliAPIException;
 import io.github.niemannd.meilisearch.api.MeiliException;
 import io.github.niemannd.meilisearch.http.ApacheHttpClient;
-import io.github.niemannd.meilisearch.http.BasicHttpResponse;
 import io.github.niemannd.meilisearch.http.HttpClient;
+import io.github.niemannd.meilisearch.http.request.BasicHttpRequestFactory;
+import io.github.niemannd.meilisearch.http.response.BasicHttpResponse;
 import io.github.niemannd.meilisearch.json.JacksonJsonProcessor;
 import io.github.niemannd.meilisearch.json.JsonProcessor;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,7 +23,8 @@ class InstanceServicesTest {
 
     private final HttpClient<String> client = mock(ApacheHttpClient.class);
     JsonProcessor processor = new JacksonJsonProcessor();
-    InstanceServices classToTest = new InstanceServices(client, processor);
+    private final GenericServiceTemplate serviceTemplate = new GenericServiceTemplate(client, processor);
+    InstanceServices classToTest = new InstanceServices(serviceTemplate, new BasicHttpRequestFactory(serviceTemplate));
 
     @Test
     void isHealthy() {
@@ -49,8 +53,26 @@ class InstanceServicesTest {
 
     @Test
     void maintenance() {
-        when(client.put(any(), any(), any())).thenReturn(new BasicHttpResponse(null, 200, "")).thenThrow(MeiliException.class);
+        final AtomicReference<String> body = new AtomicReference<>();
+        when(client.put(any(), any(), any(String.class)))
+                .thenAnswer(invocationOnMock -> {
+                    body.set(invocationOnMock.getArgument(2).toString());
+                    return new BasicHttpResponse(null, 200, "");
+                })
+                .thenAnswer(invocationOnMock -> {
+                    body.set(invocationOnMock.getArgument(2).toString());
+                    throw new MeiliException();
+                })
+                .thenAnswer(invocationOnMock -> {
+                    body.set(invocationOnMock.getArgument(2).toString());
+                    return new BasicHttpResponse(null, 200, "");
+                });
+
         assertTrue(classToTest.setMaintenance(true));
+        assertEquals("{\"health\": true }", body.get());
         assertFalse(classToTest.setMaintenance(true));
+        assertEquals("{\"health\": true }", body.get());
+        assertTrue(classToTest.setMaintenance(false));
+        assertEquals("{\"health\": false }", body.get());
     }
 }

@@ -1,6 +1,10 @@
 package io.github.niemannd.meilisearch.api;
 
-public class MeiliError {
+import java.io.Serializable;
+
+public class MeiliError implements Serializable {
+    private static final long serialVersionUID = 806696681132351344L;
+
     private String name;
     private String message;
     private String stack;

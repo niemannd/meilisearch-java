@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +16,7 @@ class ConfigurationTest {
             .setUrl("https://localhost:8080")
             .setDocumentTypes(Collections.emptyMap())
             .addDocumentType("movies", Movie.class)
-            .setKey(() -> "look at me - i'm a key").build();
+            .setKeySupplier(() -> "look at me - i'm a key").build();
 
     @Test
     void getUrl() {
@@ -24,13 +25,14 @@ class ConfigurationTest {
 
     @Test
     void getKey() {
-        assertEquals("look at me - i'm a key", classToTest.getKey().get());
+        assertEquals("look at me - i'm a key", classToTest.getKeySupplier().get());
     }
 
     @Test
     void getDocumentTypes() {
-        assertEquals(1, classToTest.getDocumentTypes().size());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> classToTest.getDocumentTypes().put("test", Movie.class));
+        Map<String, Class<?>> documentTypes = classToTest.getDocumentTypes();
+        assertEquals(1, documentTypes.size());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> documentTypes.put("test", Movie.class));
     }
 
     @Test
