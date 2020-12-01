@@ -86,7 +86,7 @@ This client uses a small abstraction layer to decouple the used http client. To 
 Alternatively you can use the provided implementation for [Apache HttpClient 5.0](https://hc.apache.org/httpcomponents-client-5.0.x/index.html).
 If you choose to use the Apache HttpClient implementation, please add Apache HttpClient as a dependency to your project.
 
-## Customizing the HttpClient
+## Customizing the JsonProcessor
 
 This client uses a small abstraction layer to decouple the used json library. To use your own json library create an implementation of the `JsonProcessor` interface.
 Alternatively you can use one of the provided implementations:
